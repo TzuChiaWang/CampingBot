@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>修改營區</h1>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(size=32) }}<br>
+        {% for error in form.name.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    
+    <p>
+        {{ form.location.label }}<br>
+        {{ form.location(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.altitude.label }}<br>
+        {{ form.altitude(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.features.label }}<br>
+        {{ form.features(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.WC.label }}<br>
+        {{ form.WC(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.signal_strength.label }}<br>
+        {{ form.signal_strength(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.pets.label }}<br>
+        {{ form.pets(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.facilities.label }}<br>
+        {{ form.facilities(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.sideservice.label }}<br>
+        {{ form.sideservice(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.open_time.label }}<br>
+        {{ form.open_time(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.parking.label }}<br>
+        {{ form.parking(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.image_url.label }}<br>
+        {{ form.image_url(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.booking_url.label }}<br>
+        {{ form.booking_url(size=32) }}<br>
+    </p>
+    
+    <p>
+        {{ form.social_url.label }}<br>
+        {{ form.social_url(size=32) }}<br>
+    </p>
+
+    <p>
+        <input type="submit" value="確認修改">
+    </p>
+</form>
+{% endblock %}

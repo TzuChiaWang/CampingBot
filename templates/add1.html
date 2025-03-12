@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>新增營區</h1>
+<form method="POST" action="{{ url_for('add_campsite') }}">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.name.label }} {{ form.name(size=32) }}
+    </div>
+    <div>
+        {{ form.location.label }} {{ form.location(size=32) }}
+    </div>
+    <div>
+        {{ form.altitude.label }} {{ form.altitude(size=32) }}
+    </div>
+    <div>
+        {{ form.features.label }} {{ form.features(size=32) }}
+    </div>
+    <div>
+        {{ form.WC.label }} {{ form.WC(size=32) }}
+    </div>
+    <div>
+        {{ form.signal_strength.label }} {{ form.signal_strength(size=32) }}
+    </div>
+    <div>
+        {{ form.pets.label }} {{ form.pets(size=32) }}
+    </div>
+    <div>
+        {{ form.facilities.label }} {{ form.facilities(size=32) }}
+    </div>
+    <div>
+        {{ form.sideservice.label }} {{ form.sideservice(size=32) }}
+    </div>
+    <div>
+        {{ form.open_time.label }} {{ form.open_time(size=32) }}
+    </div>
+    <div>
+        {{ form.parking.label }} {{ form.parking(size=32) }}
+    </div>
+    <div>
+        {{ form.image_url.label }} {{ form.image_url(size=32) }}
+    </div>
+    <div>
+        {{ form.booking_url.label }} {{ form.booking_url(size=32) }}
+    </div>
+    <div>
+        {{ form.social_url.label }} {{ form.social_url(size=32) }}
+    </div>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock %}
