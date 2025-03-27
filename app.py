@@ -18,7 +18,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from scraper import scrape_campsite, save_campsite
-from line_bot import verify_signature, handle_message, send_line_message
+from line_bot import verify_signature, handle_message, send_line_message, handle_postback
 
 # 載入環境變數
 load_dotenv()
@@ -32,30 +32,31 @@ app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "your_secret_key")
 
 @app.route("/callback", methods=["POST"])
 def callback():
-    # 獲取 X-Line-Signature header 值
-    signature = request.headers.get("X-Line-Signature", "")
+    """處理來自 LINE 的 webhook 請求"""
+    # 取得 X-Line-Signature header 值
+    signature = request.headers["X-Line-Signature"]
 
-    # 獲取請求內容
-    body = request.get_data()
-    logger.info("Request body: " + body.decode("utf-8"))
-
-    # 驗證簽名
-    if not verify_signature(body, signature):
-        logger.error("Invalid signature")
-        abort(400)
+    # 取得請求內容
+    body = request.get_data(as_text=True)
+    logger.info("Request body: " + body)
 
     try:
-        events = json.loads(body.decode("utf-8"))["events"]
-        logger.info(f"Received events: {events}")
+        # 驗證簽名
+        if not verify_signature(body.encode("utf-8"), signature):
+            abort(400)
 
+        # 解析事件
+        events = json.loads(body)["events"]
         for event in events:
             if event["type"] == "message" and event["message"]["type"] == "text":
                 handle_message(event, Campsite)
+            elif event["type"] == "postback":
+                handle_postback(event, Campsite)
 
         return "OK"
     except Exception as e:
-        logger.error(f"處理 webhook 時發生錯誤: {str(e)}")
-        abort(400)
+        logger.error(f"處理 webhook 請求時發生錯誤: {str(e)}")
+        abort(500)
 
 
 @app.route("/")
