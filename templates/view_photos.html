@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ campsite.name }} - 所有照片</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .photo-gallery {
+            padding: 20px;
+        }
+        .photo-item {
+            margin-bottom: 20px;
+        }
+        .photo-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .photo-item img:hover {
+            transform: scale(1.02);
+        }
+        .campsite-name {
+            color: #1D7D81;
+            margin-bottom: 20px;
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #1D7D81;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            opacity: 0.8;
+            display: none;
+        }
+        .back-to-top:hover {
+            opacity: 1;
+            color: white;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            color: #666;
+        }
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mt-4">
+                <h1 class="campsite-name">{{ campsite.name }} - 所有照片</h1>
+            </div>
+        </div>
+        <div class="row photo-gallery">
+            {% if campsite.image_urls %}
+                {% for image_url in campsite.image_urls %}
+                <div class="col-12 col-md-6 col-lg-4 photo-item">
+                    <img src="{{ url_for('image_proxy', url=image_url) }}" 
+                         alt="{{ campsite.name }} 照片" 
+                         class="img-fluid" 
+                         loading="lazy"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/800x600?text=圖片載入失敗';">
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <p class="error-message">此營區目前沒有照片</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <a href="#" class="back-to-top">回到頂部</a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 當滾動到一定距離時顯示/隱藏回到頂部按鈕
+        window.onscroll = function() {
+            var backToTop = document.querySelector('.back-to-top');
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                backToTop.style.display = "block";
+            } else {
+                backToTop.style.display = "none";
+            }
+        };
+
+        // 處理回到頂部按鈕點擊事件
+        document.querySelector('.back-to-top').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html> 
