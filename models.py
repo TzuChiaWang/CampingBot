@@ -90,8 +90,8 @@ class Campsite:
         else:
             query = search_conditions[0]
 
-        # 使用 distinct 確保每個營區只返回一次
-        results = list(collection.find(query).limit(5))
+        # 返回所有匹配的結果
+        results = list(collection.find(query))
 
         # 確保每個結果都包含其獨特的圖片URLs
         for result in results:
