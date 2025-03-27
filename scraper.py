@@ -1,31 +1,214 @@
 from bs4 import BeautifulSoup
-import requests
 from urllib.parse import urljoin
 import logging
+import requests
+import json
+import time
 from models import Campsite
 
 # 設定日誌
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-BASE_URL = [
-    "https://www.easycamp.com.tw/Store_624.html",
-    "https://www.easycamp.com.tw/Store_2551.html",
-    "https://www.easycamp.com.tw/Store_2602.html",
+# HTML 分頁的 URL
+PAGE_URLS = [
+    # 新北市
+    "https://www.easycamp.com.tw/Push_Camp_1_2_0.html",
+    # 桃園市
+    "https://www.easycamp.com.tw/Push_Camp_1_4_0.html",
+    "https://www.easycamp.com.tw/Push_Camp_1_4_1.html",
+    "https://www.easycamp.com.tw/Push_Camp_1_4_2.html",
+    # 新竹縣
+    "https://www.easycamp.com.tw/Push_Camp_1_5_0.html",
+    "https://www.easycamp.com.tw/Push_Camp_1_5_1.html",
+    "https://www.easycamp.com.tw/Push_Camp_1_5_2.html",
+    "https://www.easycamp.com.tw/Push_Camp_1_5_3.html",
+    "https://www.easycamp.com.tw/Push_Camp_1_5_4.html",
+    # 新竹市
+    "https://www.easycamp.com.tw/Push_Camp_1_20_0.html",
+    "https://www.easycamp.com.tw/Push_Camp_1_20_1.html",
+    "https://www.easycamp.com.tw/Push_Camp_1_20_2.html",
+    # 苗栗縣
+    "https://www.easycamp.com.tw/Push_Camp_2_7_0.html",
+    "https://www.easycamp.com.tw/Push_Camp_2_7_1.html",
+    "https://www.easycamp.com.tw/Push_Camp_2_7_2.html",
+    "https://www.easycamp.com.tw/Push_Camp_2_7_3.html",
+    # 台中市
+    "https://www.easycamp.com.tw/Push_Camp_2_9_0.html",
+    # 南投縣
+    "https://www.easycamp.com.tw/Push_Camp_2_11_0.html",
+    "https://www.easycamp.com.tw/Push_Camp_2_11_1.html",
+    "https://www.easycamp.com.tw/Push_Camp_2_11_2.html",
+    "https://www.easycamp.com.tw/Push_Camp_2_11_3.html",
+    # 彰化縣
+    "https://www.easycamp.com.tw/Push_Camp_2_12_0.html",
+    # 雲林縣
+    "https://www.easycamp.com.tw/Push_Camp_3_13_0.html",
+    "https://www.easycamp.com.tw/Push_Camp_3_13_1.html",
+    "https://www.easycamp.com.tw/Push_Camp_3_13_2.html",
+    # 嘉義縣
+    "https://www.easycamp.com.tw/Push_Camp_3_16_0.html",
+    # 台南市
+    "https://www.easycamp.com.tw/Push_Camp_3_18_0.html",
+    # 高雄市
+    "https://www.easycamp.com.tw/Push_Camp_4_21_0.html",
+    # 屏東縣
+    "https://www.easycamp.com.tw/Push_Camp_4_22_0.html"
 ]
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+# API 分頁的 URL
+API_URLS = [
+    "https://www.easycamp.com.tw/store/push_store_list/1/4/0/4/%5B%22default%22%5D/0/2",
+    "https://www.easycamp.com.tw/store/push_store_list/1/5/0/4/%5B%22default%22%5D/0/2",
+    "https://www.easycamp.com.tw/store/push_store_list/1/5/0/4/%5B%22default%22%5D/0/3",
+    "https://www.easycamp.com.tw/store/push_store_list/1/5/0/4/%5B%22default%22%5D/0/4",
+    "https://www.easycamp.com.tw/store/push_store_list/1/20/0/4/%5B%22default%22%5D/0/2",
+    "https://www.easycamp.com.tw/store/push_store_list/2/7/0/4/%5B%22default%22%5D/0/2",
+    "https://www.easycamp.com.tw/store/push_store_list/2/7/0/4/%5B%22default%22%5D/0/3",
+    "https://www.easycamp.com.tw/store/push_store_list/2/11/0/4/%5B%22default%22%5D/0/2",
+    "https://www.easycamp.com.tw/store/push_store_list/2/11/0/4/%5B%22default%22%5D/0/3",
+    "https://www.easycamp.com.tw/store/push_store_list/3/13/0/4/%5B%22default%22%5D/0/2"
+]
+
+# HTTP 請求標頭
+HTML_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Referer": "https://www.easycamp.com.tw/",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Fetch-User": "?1"
 }
 
+API_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Referer": "https://www.easycamp.com.tw/",
+    "X-Requested-With": "XMLHttpRequest",
+    "Sec-Fetch-Dest": "empty",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Site": "same-origin"
+}
+
+def get_campsite_urls_from_html():
+    """從 HTML 頁面獲取營區的 URL"""
+    campsite_urls = []
+    
+    for url in PAGE_URLS:
+        logger.info(f"正在處理 HTML 頁面: {url}")
+        
+        try:
+            response = requests.get(url, headers=HTML_HEADERS)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            
+            # 找到所有營區連結
+            campsite_links = soup.select("a[href*='Store_']")
+            
+            if not campsite_links:
+                logger.warning(f"頁面 {url} 沒有找到營區連結")
+                continue
+                
+            for link in campsite_links:
+                campsite_url = urljoin("https://www.easycamp.com.tw/", link["href"])
+                if campsite_url not in campsite_urls:
+                    campsite_urls.append(campsite_url)
+                    logger.info(f"從 HTML 找到營區連結: {campsite_url}")
+            
+            time.sleep(1)
+            
+        except requests.RequestException as e:
+            logger.error(f"獲取 HTML 營區列表時發生錯誤: {str(e)}")
+            continue
+            
+    return campsite_urls
+
+def get_campsite_urls_from_api():
+    """從 API 獲取營區的 URL"""
+    campsite_urls = []
+    
+    for url in API_URLS:
+        logger.info(f"正在處理 API: {url}")
+        
+        try:
+            response = requests.get(url, headers=API_HEADERS)
+            response.raise_for_status()
+            
+            # 檢查內容類型
+            content_type = response.headers.get('content-type', '')
+            logger.info(f"API 回應內容類型: {content_type}")
+            
+            # 如果是 JSON，嘗試解析
+            if 'application/json' in content_type:
+                try:
+                    data = response.json()
+                    if data and "data" in data:
+                        for item in data["data"]:
+                            store_id = item.get("store_id")
+                            if store_id:
+                                campsite_url = f"https://www.easycamp.com.tw/Store_{store_id}.html"
+                                if campsite_url not in campsite_urls:
+                                    campsite_urls.append(campsite_url)
+                                    logger.info(f"從 API JSON 找到營區連結: {campsite_url}")
+                except json.JSONDecodeError as e:
+                    logger.error(f"解析 JSON 時發生錯誤: {str(e)}")
+                    logger.error(f"回應內容: {response.text[:200]}...")
+            
+            # 如果是 HTML，使用 BeautifulSoup 解析
+            elif 'text/html' in content_type:
+                logger.info("收到 HTML 回應，改用 BeautifulSoup 解析")
+                soup = BeautifulSoup(response.text, "html.parser")
+                campsite_links = soup.select("a[href*='Store_']")
+                
+                if not campsite_links:
+                    logger.warning(f"API 頁面 {url} 沒有找到營區連結")
+                    continue
+                    
+                for link in campsite_links:
+                    campsite_url = urljoin("https://www.easycamp.com.tw/", link["href"])
+                    if campsite_url not in campsite_urls:
+                        campsite_urls.append(campsite_url)
+                        logger.info(f"從 API HTML 找到營區連結: {campsite_url}")
+            
+            time.sleep(1)
+            
+        except requests.RequestException as e:
+            logger.error(f"從 API 獲取營區列表時發生錯誤: {str(e)}")
+            if 'response' in locals():
+                logger.error(f"錯誤回應內容: {response.text[:200]}...")
+            continue
+            
+    return campsite_urls
 
 def scrape_campsite():
-    """爬取多個 EasyCamp 營區詳細資訊"""
-    all_campsites = []  # 存放所有營地資料
+    """爬取所有營區詳細資訊"""
+    all_campsites = []
+    all_campsite_urls = []
+    
+    # 從 HTML 頁面獲取營區 URL
+    logger.info("開始從 HTML 頁面獲取營區 URL")
+    html_urls = get_campsite_urls_from_html()
+    all_campsite_urls.extend(html_urls)
+    
+    # 從 API 獲取營區 URL
+    logger.info("開始從 API 獲取營區 URL")
+    api_urls = get_campsite_urls_from_api()
+    all_campsite_urls.extend(api_urls)
+    
+    # 移除重複的 URL
+    all_campsite_urls = list(set(all_campsite_urls))
+    logger.info(f"總共找到 {len(all_campsite_urls)} 個不重複的營區")
 
-    for base_url in BASE_URL:
+    for base_url in all_campsite_urls:
         try:
-            response = requests.get(base_url, headers=HEADERS)
+            response = requests.get(base_url, headers=HTML_HEADERS)
             response.raise_for_status()
         except requests.RequestException as e:
             print(f"❌ 無法取得網頁 {base_url}：{e}")
@@ -67,7 +250,7 @@ def scrape_campsite():
             if url.lower().endswith(".gif"):
                 return False
             try:
-                img_response = requests.head(url, headers=HEADERS, timeout=5)
+                img_response = requests.head(url, headers=HTML_HEADERS, timeout=5)
                 if (
                     img_response.status_code == 200
                     and "image" in img_response.headers.get("content-type", "")
