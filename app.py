@@ -13,6 +13,13 @@ from flask import (
 from forms import CampsiteForm
 from models import Campsite
 import requests
+<<<<<<< HEAD
+=======
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+from bson import ObjectId
+from bson.errors import InvalidId
+>>>>>>> 0447dd3c9dc2019ce492e8710a437c7570bd8102
 import json
 import os
 import logging
@@ -20,7 +27,10 @@ import hmac
 import hashlib
 import base64
 from dotenv import load_dotenv
+<<<<<<< HEAD
 from scraper import scrape_campsite, save_campsite
+=======
+>>>>>>> 0447dd3c9dc2019ce492e8710a437c7570bd8102
 
 # 載入環境變數
 load_dotenv()
@@ -410,6 +420,192 @@ def handle_message(event):
             logger.error(f"發送錯誤訊息失敗: {str(reply_error)}")
 
 
+<<<<<<< HEAD
+=======
+BASE_URL = [
+    "https://www.easycamp.com.tw/Store_624.html",
+    "https://www.easycamp.com.tw/Store_2551.html",
+    "https://www.easycamp.com.tw/Store_2602.html",
+]
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+}
+
+
+def scrape_campsite():
+    """爬取多個 EasyCamp 營區詳細資訊"""
+    all_campsites = []  # 存放所有營地資料
+
+    for base_url in BASE_URL:
+        try:
+            response = requests.get(base_url, headers=HEADERS)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            print(f"❌ 無法取得網頁 {base_url}：{e}")
+            continue  # 跳過錯誤網址
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # 營地名稱 - 改善名稱處理邏輯
+        name_tag = soup.find("h1")
+        if name_tag:
+            # 取得文字內容
+            full_name = name_tag.get_text(strip=True)
+            # 如果包含空格，只取第一個空格前的內容（通常是營區名）
+            name = full_name.split("(")[0].split("（")[0].strip()
+            logger.info(f"處理後的營區名稱: {name}")
+        else:
+            name = "未知營區"
+            logger.warning("找不到營區名稱標籤")
+
+        # 營地圖片 - 改善圖片獲取邏輯
+        image_urls = []
+
+        # 要過濾的關鍵字列表
+        filtered_keywords = [
+            "logo",
+            "icon",
+            "banner",
+            "facebook",
+            "button",
+            "loading",
+            "ajax-loader",
+        ]
+
+        # 優先從輪播圖獲取圖片
+        carousel_images = soup.select("#myCarousel .carousel-inner img, .carousel img")
+        if carousel_images:
+            for img in carousel_images:
+                img_src = img.get("src") or img.get("data-src")
+                if img_src:
+                    full_url = urljoin(base_url, img_src)
+                    # 檢查是否包含任何需要過濾的關鍵字
+                    if not any(
+                        keyword in full_url.lower() for keyword in filtered_keywords
+                    ):
+                        if not full_url.lower().endswith(".gif"):
+                            image_urls.append(full_url)
+                            logger.info(f"從輪播找到圖片: {full_url}")
+
+        # 如果輪播圖沒有圖片，嘗試獲取其他圖片
+        if not image_urls:
+            # 擴大搜索範圍
+            content_images = soup.select(
+                ".content img, .camp-info img, .camp-detail img, .camp-pic img, #camp-detail img"
+            )
+            for img in content_images:
+                img_src = img.get("src") or img.get("data-src")
+                if img_src:
+                    full_url = urljoin(base_url, img_src)
+                    # 檢查是否包含任何需要過濾的關鍵字
+                    if not any(
+                        keyword in full_url.lower() for keyword in filtered_keywords
+                    ):
+                        if not full_url.lower().endswith(".gif"):
+                            image_urls.append(full_url)
+                            logger.info(f"從內容區找到圖片: {full_url}")
+
+        # 如果還是沒有圖片，嘗試獲取所有圖片
+        if not image_urls:
+            all_images = soup.select(
+                "img[src*='upload'], img[src*='photo'], img[src*='image']"
+            )
+            for img in all_images:
+                img_src = img.get("src") or img.get("data-src")
+                if img_src:
+                    full_url = urljoin(base_url, img_src)
+                    # 檢查是否包含任何需要過濾的關鍵字
+                    if not any(
+                        keyword in full_url.lower() for keyword in filtered_keywords
+                    ):
+                        if not full_url.lower().endswith(".gif"):
+                            image_urls.append(full_url)
+                            logger.info(f"從其他區域找到圖片: {full_url}")
+
+        # 確保圖片URL是有效的
+        valid_image_urls = []
+        for url in image_urls:
+            try:
+                img_response = requests.head(url, headers=HEADERS, timeout=5)
+                if (
+                    img_response.status_code == 200
+                    and "image" in img_response.headers.get("content-type", "")
+                ):
+                    if not url.lower().endswith(".gif"):
+                        valid_image_urls.append(url)
+                        logger.info(f"驗證有效的圖片URL: {url}")
+            except Exception as e:
+                logger.error(f"檢查圖片URL時發生錯誤: {url}, 錯誤: {str(e)}")
+                continue
+
+        # 如果沒有有效圖片，使用預設圖片
+        if not valid_image_urls:
+            valid_image_urls = ["https://via.placeholder.com/1024x768"]
+            logger.info("使用預設圖片")
+
+        # 營區屬性
+        details = {
+            item.select_one(".title").text.strip(): item.select_one("li").text.strip()
+            for item in soup.select(".classify")
+        }
+
+        # 無線通訊資訊
+        signal_tag = soup.select_one(".classify .title:contains('無線通訊') + ul")
+        signal = (
+            ", ".join([li.text.strip() for li in signal_tag.select("li")])
+            if signal_tag
+            else "未知"
+        )
+
+        # 取得特定欄位
+        location_tag = soup.select_one(".camp-add")
+        location = location_tag.text.strip() if location_tag else "未知"
+        altitude = details.get("海拔", "未知")
+        features = details.get("營區特色", "未知")
+        WC = details.get("衛浴配置", "未知")
+        pets = details.get("攜帶寵物規定", "未知")
+        facilities = details.get("附屬設施", "未知")
+        sideservice = details.get("附屬服務", "未知")
+        open_time = details.get("營業時間", "未知")
+        parking = details.get("停車方式", "未知")
+
+        # 訂位網址 & 社群網址
+        booking_url = soup.select_one("a[href*='booking']")
+        social_url = soup.select_one("a[href*='facebook']")
+
+        campsite_data = {
+            "name": name,
+            "location": location,
+            "altitude": altitude,
+            "features": features,
+            "WC": WC,
+            "signal_strength": signal,
+            "pets": pets,
+            "facilities": facilities,
+            "sideservice": sideservice,
+            "open_time": open_time,
+            "parking": parking,
+            "image_urls": valid_image_urls,  # 使用驗證過的圖片URL列表
+            "booking_url": base_url,
+            "social_url": social_url["href"] if social_url else "",
+        }
+
+        all_campsites.append(campsite_data)
+
+    return all_campsites
+
+
+def save_campsite():
+    """將爬取的營區資訊存入資料庫"""
+    campsites = scrape_campsite()
+
+    for data in campsites:
+        if not Campsite.get_by_name(data["name"]):
+            Campsite.create(data)
+
+
+>>>>>>> 0447dd3c9dc2019ce492e8710a437c7570bd8102
 @app.route("/")
 def index():
     campsites = Campsite.get_all()
