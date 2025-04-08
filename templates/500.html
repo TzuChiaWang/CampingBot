@@ -2,8 +2,38 @@
 
 {% block content %}
 <div class="container text-center mt-5">
-    <h1 class="display-1">500</h1>
-    <p class="lead">系統發生錯誤</p>
-    <a href="{{ url_for('index') }}" class="btn btn-primary">返回首頁</a>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="error-page">
+                <h1 class="display-1 text-danger mb-4">500</h1>
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+                    <h2 class="h4 mb-3">系統發生錯誤</h2>
+                    <p class="lead text-muted">
+                        抱歉，系統暫時無法處理您的請求。<br>
+                        請稍後再試，或聯繫系統管理員。
+                    </p>
+                </div>
+                <div>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>返回首頁
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-{% endblock %} 
+
+<style>
+.error-page {
+    padding: 3rem;
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+}
+.error-page .display-1 {
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

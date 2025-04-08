@@ -19,6 +19,8 @@ import logging
 from dotenv import load_dotenv
 from scraper import scrape_campsite, save_campsite
 from line_bot import verify_signature, handle_message, send_line_message, handle_postback
+from bson import ObjectId
+from bson.errors import InvalidId
 
 # 載入環境變數
 load_dotenv()
@@ -61,14 +63,21 @@ def callback():
 
 @app.route("/")
 def index():
-    campsites = Campsite.get_all()
+    query = request.args.get("q", "")
+    if query:
+        campsites = Campsite.search(query)
+    else:
+        campsites = Campsite.get_all()
     return render_template("index.html", campsites=campsites)
 
 
-@app.route("/add1", methods=["GET", "POST"])
+@app.route("/add", methods=["GET", "POST"])
 def add_campsite():
     form = CampsiteForm()
     if form.validate_on_submit():
+        # 將圖片 URL 字串分割為列表
+        image_urls = [url.strip() for url in form.image_url.data.split(',') if url.strip()] if form.image_url.data else []
+        
         campsite_data = {
             "name": form.name.data,
             "location": form.location.data,
@@ -81,7 +90,7 @@ def add_campsite():
             "sideservice": form.sideservice.data,
             "open_time": form.open_time.data,
             "parking": form.parking.data,
-            "image_urls": form.image_urls.data,
+            "image_urls": image_urls,  # 使用處理後的圖片 URL 列表
             "booking_url": form.booking_url.data,
             "social_url": form.social_url.data,
         }
@@ -106,7 +115,10 @@ def edit_campsite(id):
     if request.method == "GET":
         # 填充表單數據
         for field in form._fields:
-            if field in campsite:
+            if field == "image_url" and "image_urls" in campsite:
+                # 將圖片URL列表轉換為逗號分隔的字符串
+                form._fields[field].data = ", ".join(campsite["image_urls"])
+            elif field in campsite:
                 form._fields[field].data = campsite[field]
 
     if form.validate_on_submit():
@@ -122,7 +134,7 @@ def edit_campsite(id):
             "sideservice": form.sideservice.data,
             "open_time": form.open_time.data,
             "parking": form.parking.data,
-            "image_urls": form.image_urls.data,
+            "image_urls": [url.strip() for url in form.image_url.data.split(',') if url.strip()] if form.image_url.data else [],
             "booking_url": form.booking_url.data,
             "social_url": form.social_url.data,
         }

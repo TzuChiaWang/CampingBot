@@ -5,10 +5,10 @@
     <div class="col-md-8">
       <div class="card">
         <div class="card-header bg-primary text-white">
-          <h2 class="mb-0">修改營區</h2>
+          <h2 class="mb-0">新增營區</h2>
         </div>
         <div class="card-body">
-          <form method="POST" action="" class="needs-validation" novalidate>
+          <form method="POST" action="{{ url_for('add_campsite') }}" class="needs-validation" novalidate>
             {{ form.hidden_tag() }}
             
             <div class="row">
@@ -16,9 +16,6 @@
                 <div class="form-group">
                   {{ form.name.label(class="form-label") }}
                   {{ form.name(class="form-control", placeholder="請輸入營區名稱") }}
-                  {% for error in form.name.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                  {% endfor %}
                 </div>
               </div>
               <div class="col-md-6 mb-3">
@@ -120,7 +117,7 @@
             </div>
 
             <div class="text-center mt-4">
-              <button type="submit" class="btn btn-primary btn-lg px-5">確認修改</button>
+              {{ form.submit(class="btn btn-primary btn-lg px-5") }}
             </div>
           </form>
         </div>
