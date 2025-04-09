@@ -14,13 +14,13 @@ from forms import CampsiteForm
 from models import Campsite
 import requests
 import json
-import os
 import logging
 from dotenv import load_dotenv
-from scraper import scrape_campsite, save_campsite
-from line_bot import verify_signature, handle_message, send_line_message, handle_postback
+from scraper import save_campsite
+from line_bot import verify_signature, handle_message, handle_postback
 from bson import ObjectId
 from bson.errors import InvalidId
+import secrets
 
 # 載入環境變數
 load_dotenv()
@@ -30,7 +30,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "your_secret_key")
+app.config["SECRET_KEY"] = secrets.token_hex(32)  # 每次啟動時生成新的 64 字符密鑰
 
 @app.route("/callback", methods=["POST"])
 def callback():
