@@ -1,14 +1,19 @@
 from pymongo import MongoClient
 import logging
+import os
+from dotenv import load_dotenv
+
+# 載入環境變數
+load_dotenv()
 
 # 設定日誌
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 連接到 MongoDB
-client = MongoClient("mongodb://localhost:27017/")
-db = client["CampingBot"]
-collection = db["CampArea"]
+client = MongoClient(os.getenv("MONGODB_URI"))
+db = client[os.getenv("MONGODB_DB")]
+collection = db[os.getenv("MONGODB_COLLECTION")]
 
 try:
     # 檢查連接
@@ -17,7 +22,7 @@ try:
 
     # 獲取文檔數量
     count = collection.count_documents({})
-    logger.info(f"CampArea 集合中有 {count} 個文檔")
+    logger.info(f"{os.getenv('MONGODB_COLLECTION')} 集合中有 {count} 個文檔")
 
     # 獲取一個示例文檔
     if count > 0:

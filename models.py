@@ -1,11 +1,16 @@
 from pymongo import MongoClient
 import re
 from typing import List, Dict, Any
+import os
+from dotenv import load_dotenv
+
+# 載入環境變數
+load_dotenv()
 
 # 連接到 MongoDB
-client = MongoClient("mongodb://localhost:27017/")
-db = client["CampingBot"]
-collection = db["CampArea"]
+client = MongoClient(os.getenv("MONGODB_URI"))
+db = client[os.getenv("MONGODB_DB")]
+collection = db[os.getenv("MONGODB_COLLECTION")]
 
 
 class Campsite:
