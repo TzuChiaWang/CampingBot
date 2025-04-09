@@ -21,6 +21,7 @@ from line_bot import verify_signature, handle_message, handle_postback
 from bson import ObjectId
 from bson.errors import InvalidId
 import secrets
+import os
 
 # 載入環境變數
 load_dotenv()
@@ -265,5 +266,5 @@ def internal_error(error):
 
 
 if __name__ == "__main__":
-    # 使用 0.0.0.0 讓外部可以訪問，並使用 port 3000
-    app.run(host="0.0.0.0", port=3000, debug=True)
+    # 只在本地開發環境使用 Flask 開發服務器
+    app.run(host="0.0.0.0", port=int(os.getenv('PORT', 3000)), debug=True)
