@@ -8,7 +8,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 連接到 MongoDB
-client = MongoClient(os.getenv("MONGODB_URI"))
+client = MongoClient(
+    os.getenv("MONGODB_URI"),
+    tls=True,
+    tlsAllowInvalidCertificates=True,
+    retryWrites=True,
+    w="majority"
+)
 db = client[os.getenv("MONGODB_DB")]
 collection = db[os.getenv("MONGODB_COLLECTION")]
 

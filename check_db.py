@@ -11,7 +11,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 連接到 MongoDB
-client = MongoClient(os.getenv("MONGODB_URI"))
+client = MongoClient(
+    os.getenv("MONGODB_URI"),
+    tls=True,
+    tlsAllowInvalidCertificates=True,
+    retryWrites=True,
+    w="majority"
+)
 db = client[os.getenv("MONGODB_DB")]
 collection = db[os.getenv("MONGODB_COLLECTION")]
 
