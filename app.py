@@ -16,12 +16,12 @@ import requests
 import json
 import logging
 from dotenv import load_dotenv
-from scraper import save_campsite
 from line_bot import verify_signature, handle_message, handle_postback
 from bson import ObjectId
 from bson.errors import InvalidId
 import secrets
 import os
+from scraper import save_campsite
 
 # 載入環境變數
 load_dotenv()
@@ -145,13 +145,6 @@ def edit_campsite(id):
     return render_template("edit.html", form=form, campsite=campsite)
 
 
-@app.route("/scrape")
-def scrape():
-    save_campsite()  # 爬取並存入資料庫
-    flash("營區爬取完成！", "success")
-    return redirect(url_for("index"))
-
-
 @app.route("/delete/<id>")
 def delete_campsite(id):
     try:
@@ -180,79 +173,16 @@ def image_proxy():
         return "圖片無法載入", response.status_code
 
 
-@app.route("/api/campsites", methods=["GET"])
-def api_search_campsite():
-    query = request.args.get("q", "")
-    campsites = Campsite.search(query)
-    return jsonify([{**c, "_id": str(c["_id"])} for c in campsites])
-
-
-@app.route("/view_photos/<campsite_id>")
-def view_photos(campsite_id):
-    """顯示營區的所有照片"""
+@app.route("/update_data")
+def update_data():
+    """更新營區資料"""
     try:
-        logger.info(f"嘗試訪問營區照片頁面，ID: {campsite_id}")
-
-        # 檢查 ID 格式
-        if not ObjectId.is_valid(campsite_id):
-            logger.error(f"無效的營區ID格式: {campsite_id}")
-            flash("無效的營區ID", "error")
-            return render_template("404.html"), 404
-
-        # 轉換為 ObjectId
-        object_id = ObjectId(campsite_id)
-        logger.info(f"轉換後的 ObjectId: {object_id}")
-
-        # 獲取營區資訊
-        campsite = Campsite.get_by_id(object_id)
-        if not campsite:
-            logger.error(f"找不到營區，ID: {campsite_id}")
-            flash("找不到指定的營區", "error")
-            return render_template("404.html"), 404
-
-        logger.info(
-            f"成功找到營區: {campsite['name']}, 圖片數量: {len(campsite.get('image_urls', []))}"
-        )
-
-        # 檢查圖片 URLs
-        image_urls = campsite.get("image_urls", [])
-        if not image_urls:
-            logger.warning(f"營區 {campsite['name']} 沒有圖片")
-            flash("此營區目前沒有照片", "warning")
-            return render_template("view_photos.html", campsite=campsite)
-
-        # 驗證圖片 URLs
-        valid_urls = []
-        for url in image_urls:
-            try:
-                response = requests.head(url, timeout=2)
-                if response.status_code == 200:
-                    valid_urls.append(url)
-                else:
-                    logger.warning(
-                        f"無效的圖片URL: {url}, 狀態碼: {response.status_code}"
-                    )
-            except Exception as e:
-                logger.error(f"檢查圖片URL時發生錯誤: {url}, 錯誤: {str(e)}")
-
-        if not valid_urls:
-            logger.warning(f"營區 {campsite['name']} 沒有有效的圖片URL")
-            flash("無法載入營區照片，請稍後再試", "error")
-            campsite["image_urls"] = []
-        else:
-            campsite["image_urls"] = valid_urls
-            logger.info(f"有效圖片數量: {len(valid_urls)}")
-
-        return render_template("view_photos.html", campsite=campsite)
-
-    except InvalidId as e:
-        logger.error(f"無效的 ObjectId 格式: {str(e)}")
-        flash("無效的營區ID", "error")
-        return render_template("404.html"), 404
+        save_campsite()  # 執行爬蟲並儲存資料
+        flash("營區資料已更新！", "success")
     except Exception as e:
-        logger.error(f"查看照片時發生錯誤: {str(e)}")
-        flash("系統發生錯誤，請稍後再試", "error")
-        return render_template("500.html"), 500
+        logger.error(f"更新營區資料時發生錯誤: {str(e)}")
+        flash("更新資料時發生錯誤，請稍後再試", "error")
+    return redirect(url_for("index"))
 
 
 @app.errorhandler(404)

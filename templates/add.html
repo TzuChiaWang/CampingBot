@@ -14,14 +14,20 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <div class="form-group">
-                  {{ form.name.label(class="form-label") }}
-                  {{ form.name(class="form-control", placeholder="請輸入營區名稱") }}
+                  {{ form.name.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="請輸入營區名稱") }}
+                  {% if form.name.errors %}
+                    <div class="invalid-feedback">{{ form.name.errors[0] }}</div>
+                  {% endif %}
                 </div>
               </div>
               <div class="col-md-6 mb-3">
                 <div class="form-group">
-                  {{ form.location.label(class="form-label") }}
-                  {{ form.location(class="form-control", placeholder="請輸入地址") }}
+                  {{ form.location.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""), placeholder="請輸入地址") }}
+                  {% if form.location.errors %}
+                    <div class="invalid-feedback">{{ form.location.errors[0] }}</div>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -29,14 +35,95 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <div class="form-group">
-                  {{ form.altitude.label(class="form-label") }}
-                  {{ form.altitude(class="form-control", placeholder="請輸入海拔") }}
+                  {{ form.altitude.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.altitude(class="form-control" + (" is-invalid" if form.altitude.errors else ""), placeholder="請輸入海拔高度") }}
+                  {% if form.altitude.errors %}
+                    <div class="invalid-feedback">{{ form.altitude.errors[0] }}</div>
+                  {% endif %}
                 </div>
               </div>
               <div class="col-md-6 mb-3">
                 <div class="form-group">
-                  {{ form.features.label(class="form-label") }}
-                  {{ form.features(class="form-control", placeholder="請輸入營區特色") }}
+                  {{ form.features.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.features(class="form-control" + (" is-invalid" if form.features.errors else ""), placeholder="請輸入營區特色") }}
+                  {% if form.features.errors %}
+                    <div class="invalid-feedback">{{ form.features.errors[0] }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="form-group">
+                  {{ form.signal_strength.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.signal_strength(class="form-control" + (" is-invalid" if form.signal_strength.errors else ""), placeholder="請輸入通訊狀況") }}
+                  {% if form.signal_strength.errors %}
+                    <div class="invalid-feedback">{{ form.signal_strength.errors[0] }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="form-group">
+                  {{ form.pets.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.pets(class="form-control" + (" is-invalid" if form.pets.errors else ""), placeholder="請輸入寵物規定") }}
+                  {% if form.pets.errors %}
+                    <div class="invalid-feedback">{{ form.pets.errors[0] }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="form-group">
+                  {{ form.facilities.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.facilities(class="form-control" + (" is-invalid" if form.facilities.errors else ""), placeholder="請輸入附屬設施") }}
+                  {% if form.facilities.errors %}
+                    <div class="invalid-feedback">{{ form.facilities.errors[0] }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="form-group">
+                  {{ form.parking.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.parking(class="form-control" + (" is-invalid" if form.parking.errors else ""), placeholder="請輸入停車方式") }}
+                  {% if form.parking.errors %}
+                    <div class="invalid-feedback">{{ form.parking.errors[0] }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="form-group">
+                  {{ form.booking_url.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.booking_url(class="form-control" + (" is-invalid" if form.booking_url.errors else ""), placeholder="請輸入訂位網址") }}
+                  {% if form.booking_url.errors %}
+                    <div class="invalid-feedback">{{ form.booking_url.errors[0] }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="form-group">
+                  {{ form.social_url.label(class="form-label") }}
+                  {{ form.social_url(class="form-control" + (" is-invalid" if form.social_url.errors else ""), placeholder="請輸入社群網址（選填）") }}
+                  {% if form.social_url.errors %}
+                    <div class="invalid-feedback">{{ form.social_url.errors[0] }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <div class="form-group">
+                  {{ form.image_url.label(class="form-label") }} <span class="text-danger">*</span>
+                  {{ form.image_url(class="form-control" + (" is-invalid" if form.image_url.errors else ""), placeholder="請輸入圖片網址，多個網址請用逗號分隔") }}
+                  {% if form.image_url.errors %}
+                    <div class="invalid-feedback">{{ form.image_url.errors[0] }}</div>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -45,79 +132,28 @@
               <div class="col-md-6 mb-3">
                 <div class="form-group">
                   {{ form.WC.label(class="form-label") }}
-                  {{ form.WC(class="form-control", placeholder="請描述廁所設施") }}
+                  {{ form.WC(class="form-control", placeholder="請輸入衛浴配置（選填）") }}
                 </div>
               </div>
-              <div class="col-md-6 mb-3">
-                <div class="form-group">
-                  {{ form.signal_strength.label(class="form-label") }}
-                  {{ form.signal_strength(class="form-control", placeholder="請描述訊號強度") }}
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <div class="form-group">
-                  {{ form.pets.label(class="form-label") }}
-                  {{ form.pets(class="form-control", placeholder="寵物相關規定") }}
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="form-group">
-                  {{ form.facilities.label(class="form-label") }}
-                  {{ form.facilities(class="form-control", placeholder="請輸入設施資訊") }}
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
               <div class="col-md-6 mb-3">
                 <div class="form-group">
                   {{ form.sideservice.label(class="form-label") }}
-                  {{ form.sideservice(class="form-control", placeholder="請輸入周邊服務") }}
+                  {{ form.sideservice(class="form-control", placeholder="請輸入附屬服務（選填）") }}
                 </div>
               </div>
-              <div class="col-md-6 mb-3">
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
                 <div class="form-group">
                   {{ form.open_time.label(class="form-label") }}
-                  {{ form.open_time(class="form-control", placeholder="請輸入營業時間") }}
+                  {{ form.open_time(class="form-control", placeholder="請輸入營業時間（選填）") }}
                 </div>
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <div class="form-group">
-                  {{ form.parking.label(class="form-label") }}
-                  {{ form.parking(class="form-control", placeholder="請輸入停車資訊") }}
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="form-group">
-                  {{ form.image_url.label(class="form-label") }}
-                  {{ form.image_url(class="form-control", placeholder="請輸入圖片網址，多個網址請用逗號分隔") }}
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <div class="form-group">
-                  {{ form.booking_url.label(class="form-label") }}
-                  {{ form.booking_url(class="form-control", placeholder="請輸入預訂網址") }}
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="form-group">
-                  {{ form.social_url.label(class="form-label") }}
-                  {{ form.social_url(class="form-control", placeholder="請輸入社群媒體連結") }}
-                </div>
-              </div>
-            </div>
-
-            <div class="text-center mt-4">
-              {{ form.submit(class="btn btn-primary btn-lg px-5") }}
+            <div class="text-center">
+              {{ form.submit(class="btn btn-primary") }}
             </div>
           </form>
         </div>

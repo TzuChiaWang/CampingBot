@@ -67,7 +67,8 @@ def handle_message(event, Campsite):
     if not campsites:
         send_line_message(
             event["replyToken"],
-            [{"type": "text", "text": "抱歉，找不到符合的營區。請試試其他關鍵字！"}],
+            [{"type": "text", "text": """抱歉，找不到符合的營區。
+請試試其他關鍵字！"""}],
         )
         return
 
@@ -235,7 +236,7 @@ def handle_search_results(reply_token, campsites, current_page, keyword):
                                     },
                                     {
                                         "type": "text",
-                                        "text": f"通訊：{camp.get('signal_strength', '未知')}",
+                                        "text": f"通訊：{camp.get('signal_strength', '未知').replace('有訊號', '').strip()}",
                                         "wrap": True,
                                         "color": "#666666",
                                         "size": "md",
