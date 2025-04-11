@@ -397,6 +397,8 @@ def handle_postback(event, Campsite):
         # 處理地區選擇
         elif data.get("action") == "select_region":
             region = data.get("region")
+            if user_id not in user_states:
+                user_states[user_id] = {}
             user_states[user_id]["region"] = region
             user_states[user_id]["step"] = "city"
             # 發送對應地區的縣市選擇介面
@@ -405,61 +407,77 @@ def handle_postback(event, Campsite):
         # 處理縣市選擇
         elif data.get("action") == "select_city":
             city = data.get("city")
+            if user_id not in user_states:
+                user_states[user_id] = {}
             user_states[user_id]["city"] = city
             user_states[user_id]["step"] = "altitude"
             send_line_message(event["replyToken"], [create_altitude_selection()])
             
         # 處理海拔選擇
         elif data.get("action") == "select_altitude":
-            user_states[user_id]["altitude"] = data.get("altitude")
+            if user_id not in user_states:
+                user_states[user_id] = {}
+            user_states[user_id]["altitude"] = data.get("altitude", "兩者皆可")
             user_states[user_id]["step"] = "pet"
             send_line_message(event["replyToken"], [create_pet_selection()])
             
         # 處理寵物選擇
         elif data.get("action") == "select_pet":
-            user_states[user_id]["pet"] = data.get("pet")
+            if user_id not in user_states:
+                user_states[user_id] = {}
+            user_states[user_id]["pet"] = data.get("pet", "兩者皆可")
             user_states[user_id]["step"] = "parking"
             send_line_message(event["replyToken"], [create_parking_selection()])
             
         # 處理停車選擇
         elif data.get("action") == "select_parking":
-            user_states[user_id]["parking"] = data.get("parking")
+            if user_id not in user_states:
+                user_states[user_id] = {}
+            user_states[user_id]["parking"] = data.get("parking", "兩者皆可")
             user_states[user_id]["step"] = "go"
             send_line_message(event["replyToken"], [create_go_button()])
             
         # 處理搜尋開始
         elif data.get("action") == "search_start":
             state = user_states.get(user_id, {})
-            if not state:
+            if not state or "city" not in state:
                 send_line_message(event["replyToken"], [{"type": "text", "text": "請重新開始搜尋流程"}])
                 return
                 
             # 構建搜尋關鍵字
             keywords = []
-            keywords.append(state["city"])  # 使用選擇的縣市而不是地區
             
-            if state["altitude"] != "兩者皆可":
+            # 使用選擇的縣市
+            keywords.append(state.get("city", ""))
+            
+            # 處理其他條件
+            if state.get("altitude") and state["altitude"] != "兩者皆可":
                 keywords.append(state["altitude"])
-            if state["pet"] != "兩者皆可":
+            if state.get("pet") and state["pet"] != "兩者皆可":
                 keywords.append(state["pet"])
-            if state["parking"] != "兩者皆可":
+            if state.get("parking") and state["parking"] != "兩者皆可":
                 keywords.append(state["parking"])
                 
             # 執行搜尋
-            search_text = " ".join(keywords)
+            search_text = " ".join(filter(None, keywords))
             campsites = Campsite.search_by_keywords(search_text)
             
-            # 清除用戶狀態
-            del user_states[user_id]
-            
-            # 顯示搜尋結果
-            return handle_search_results(event["replyToken"], campsites, 1, search_text)
+            if not campsites:
+                send_line_message(
+                    event["replyToken"],
+                    [{"type": "text", "text": "抱歉，找不到符合條件的營區。請嘗試放寬搜尋條件。"}]
+                )
+            else:
+                # 清除用戶狀態
+                user_states.pop(user_id, None)
+                # 顯示搜尋結果
+                return handle_search_results(event["replyToken"], campsites, 1, search_text)
             
     except Exception as e:
         logger.error(f"處理 postback 時發生錯誤: {str(e)}")
         send_line_message(
             event["replyToken"],
-            [{"type": "text", "text": "抱歉，處理您的請求時發生錯誤。請重新搜尋。"}],
+            [{"type": "text", "text": "抱歉，處理您的請求時發生錯誤。請重新搜尋。"}]
         )
 
 def handle_search_results(reply_token, campsites, current_page, keyword):
