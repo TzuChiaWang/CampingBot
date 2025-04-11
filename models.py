@@ -96,11 +96,18 @@ class Campsite:
 
         # 定義通訊服務對應關係
         signal_keywords = {
-            "中華電信": ["中華", "中華電信", "有網路"],
-            "遠傳": ["遠傳", "遠傳電信", "有網路"],
-            "台哥大": ["台哥大", "台哥大電信", "有網路"],
-            "亞太": ["亞太", "亞太電信", "有網路"],
+            "中華電信有訊號": ["中華", "中華電信"],
+            "中華電信": ["中華", "中華電信"],
+            "遠傳有訊號": ["遠傳", "遠傳電信"],
+            "遠傳": ["遠傳", "遠傳電信"],
+            "台哥大有訊號": ["台哥大", "台哥大電信"],
+            "台哥大": ["台哥大", "台哥大電信"],
+            "亞太有訊號": ["亞太", "亞太電信"],
+            "亞太": ["亞太", "亞太電信"],
             "WIFI": ["WIFI", "有網路", "wifi"],
+            "wifi": ["WIFI", "有網路", "wifi"],
+            "有wifi": ["WIFI", "有網路", "wifi"],
+            "有WIFI": ["WIFI", "有網路", "wifi"],
             "無資訊": ["無資訊"]
         }
 
@@ -139,7 +146,13 @@ class Campsite:
             signal_match = False
             for signal_type, keywords in signal_keywords.items():
                 if keyword in keywords:
-                    signal_filter = {"signal_strength": signal_type}
+                    # 使用正則表達式來匹配逗號分隔的字串中的值
+                    signal_filter = {
+                        "signal_strength": {
+                            "$regex": f".*{signal_type}.*",
+                            "$options": "i"
+                        }
+                    }
                     signal_match = True
                     break
             if signal_match:
