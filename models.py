@@ -84,49 +84,74 @@ class Campsite:
         pet_filter = None
         signal_filter = None
         parking_filter = None
+        region_filter = None
+
+        # 定義各區域包含的城市
+        region_cities = {
+            "北部": ["臺北", "台北", "新北", "基隆", "新竹", "桃園", "宜蘭"],
+            "中部": ["臺中", "台中", "苗栗", "彰化", "南投", "雲林"],
+            "南部": ["高雄", "臺南", "台南", "嘉義", "屏東", "澎湖"],
+            "東部": ["花蓮", "臺東", "台東"]
+        }
 
         # 定義通訊服務對應關係
-        signal_mapping = {
-            "中華": "中華電信",
-            "遠傳": "遠傳",
-            "台哥大": "台哥大",
-            "亞太": "亞太",
-            "wifi": "WIFI",
-            "WIFI": "WIFI",
-            "網路": "WIFI",
-            "無資訊": "無資訊"
+        signal_keywords = {
+            "中華電信": ["中華", "中華電信", "有網路"],
+            "遠傳": ["遠傳", "遠傳電信", "有網路"],
+            "台哥大": ["台哥大", "台哥大電信", "有網路"],
+            "亞太": ["亞太", "亞太電信", "有網路"],
+            "WIFI": ["WIFI", "有網路", "wifi"],
+            "無資訊": ["無資訊"]
         }
 
         # 定義停車方式對應關係
-        parking_mapping = {
-            "車邊": "車停營位旁",
-            "營位旁": "車停營位旁",
-            "集中": "集中停車",
-            "停車場": "集中停車"
+        parking_keywords = {
+            "車停營位旁": ["車邊", "營位旁", "車停營位旁", "車停帳邊"],
+            "集中停車": ["集中停車", "集中", "停車場"]
         }
 
         for keyword in keyword_list:
+            # 處理區域關鍵字
+            if keyword in region_cities:
+                city_patterns = [f".*{city}.*" for city in region_cities[keyword]]
+                region_filter = {
+                    "location": {
+                        "$regex": f"({'|'.join(city_patterns)})",
+                        "$options": "i"
+                    }
+                }
+                continue
             # 處理海拔相關的關鍵字
-            if keyword in ["海拔高", "高海拔"]:
+            elif keyword in ["海拔高", "高海拔"]:
                 altitude_filter = {"altitude": {"$regex": r"\d+", "$exists": True}}
                 continue
             elif keyword in ["海拔低", "低海拔"]:
                 altitude_filter = {"altitude": {"$regex": r"\d+", "$exists": True}}
                 continue
             # 處理寵物相關的關鍵字
-            elif keyword in ["可帶寵物", "寵物可", "可攜帶寵物"]:
+            elif keyword in ["可帶寵物", "寵物可", "可攜帶寵物", "可寵物"]:
                 pet_filter = {"pets": "自搭帳可帶寵物"}
                 continue
-            elif keyword in ["不可帶寵物", "寵物不可", "不可攜帶寵物"]:
+            elif keyword in ["不可帶寵物", "寵物不可", "不可攜帶寵物", "不可寵物"]:
                 pet_filter = {"pets": "全區不可帶寵物"}
                 continue
             # 處理通訊相關的關鍵字
-            elif keyword in signal_mapping:
-                signal_filter = {"signal_strength": signal_mapping[keyword]}
+            signal_match = False
+            for signal_type, keywords in signal_keywords.items():
+                if keyword in keywords:
+                    signal_filter = {"signal_strength": signal_type}
+                    signal_match = True
+                    break
+            if signal_match:
                 continue
             # 處理停車相關的關鍵字
-            elif keyword in parking_mapping:
-                parking_filter = {"parking": parking_mapping[keyword]}
+            parking_match = False
+            for parking_type, keywords in parking_keywords.items():
+                if keyword in keywords:
+                    parking_filter = {"parking": parking_type}
+                    parking_match = True
+                    break
+            if parking_match:
                 continue
 
             regex = re.compile(keyword, re.IGNORECASE)
@@ -150,6 +175,13 @@ class Campsite:
             query = search_conditions[0]
         else:
             query = {}
+
+        # 添加區域過濾條件
+        if region_filter:
+            if query:
+                query = {"$and": [query, region_filter]}
+            else:
+                query = region_filter
 
         # 添加寵物過濾條件
         if pet_filter:

@@ -60,7 +60,7 @@ def handle_message(event, Campsite):
     """處理收到的訊息"""
     message_text = event["message"]["text"].strip()
     
-    # 一般搜尋
+    # 使用整合後的關鍵字搜尋
     campsites = Campsite.search_by_keywords(message_text)
     current_page = 1
 
@@ -68,7 +68,17 @@ def handle_message(event, Campsite):
         send_line_message(
             event["replyToken"],
             [{"type": "text", "text": """抱歉，找不到符合的營區。
-請試試其他關鍵字！"""}],
+請試試其他關鍵字！
+
+您可以：
+1. 輸入區域搜尋（北部、中部、南部、東部）
+2. 結合區域和其他條件，例如：
+   - 中部 海拔高
+   - 北部 可帶寵物
+   - 南部 wifi
+3. 或直接搜尋特定地點，例如：
+   - 苗栗 海拔高
+   - 宜蘭 寵物可"""}],
         )
         return
 
