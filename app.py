@@ -22,6 +22,7 @@ from bson.errors import InvalidId
 import secrets
 import os
 from scraper import save_campsite
+from datetime import datetime
 
 # 載入環境變數
 load_dotenv()
@@ -183,6 +184,12 @@ def update_data():
         logger.error(f"更新營區資料時發生錯誤: {str(e)}")
         flash("更新資料時發生錯誤，請稍後再試", "error")
     return redirect(url_for("index"))
+
+
+@app.route("/health")
+def health_check():
+    """健康檢查端點"""
+    return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()})
 
 
 @app.errorhandler(404)

@@ -69,44 +69,66 @@ def send_line_message(reply_token, messages):
         return False
 
 def create_location_selection():
-    """創建縣市選擇介面"""
+    """創建地區選擇介面"""
+    region_display = {
+        "北部": "我想去北部露營！",
+        "中部": "中部的營地聽起來不錯！",
+        "南部": "南部陽光真好！",
+        "東部": "去東部享受大自然！"
+    }
     return {
         "type": "flex",
         "altText": "請選擇地區",
         "contents": {
             "type": "bubble",
+            "hero": {
+                "type": "image",
+                "url": "https://i.imgur.com/GspFcEp.jpeg",  
+                "size": "full",
+                "aspectRatio": "20:13",
+                "aspectMode": "cover"
+            },
             "body": {
                 "type": "box",
                 "layout": "vertical",
+                "spacing": "md",
                 "contents": [
                     {
                         "type": "text",
-                        "text": "你想去哪裡呢？🎉",
-                        "weight": "bold",
+                        "text": "您想去哪放鬆呢",
                         "size": "xl",
+                        "weight": "bold",
                         "align": "center",
-                        "color": "#1D7D81"
+                        "color": "#905c44"
                     },
                     {
                         "type": "box",
                         "layout": "vertical",
-                        "margin": "lg",
                         "spacing": "sm",
                         "contents": [
                             {
-                                "type": "button",
-                                "style": "primary",
-                                "color": "#1D7D81",
-                                "action": {
-                                    "type": "postback",
-                                    "label": region,
-                                    "data": json.dumps({
-                                        "action": "select_region",
-                                        "region": region
-                                    }),
-                                    "displayText": region
-                                },
-                                "margin": "sm"
+                                "type": "box",
+                                "layout": "vertical",
+                                "backgroundColor": "#f5f5f5",
+                                "cornerRadius": "lg",
+                                "paddingAll": "md",
+                                "contents": [
+                                    {
+                                        "type": "button",
+                                        "action": {
+                                            "type": "postback",
+                                            "label": region,
+                                            "data": json.dumps({
+                                                "action": "select_region",
+                                                "region": region
+                                            }),
+                                            "displayText": region_display[region]
+                                        },
+                                        "style": "link",
+                                        "color": "#905c44",
+                                        "height": "sm"
+                                    }
+                                ]
                             } for region in ["北部", "中部", "南部", "東部"]
                         ]
                     }
@@ -117,43 +139,65 @@ def create_location_selection():
 
 def create_city_selection(region):
     """創建縣市選擇介面"""
+    region_images = {
+        "北部": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Northern_Taiwan_official_determined.svg/1920px-Northern_Taiwan_official_determined.svg.png",  
+        "中部": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Central_Taiwan_official_determined.svg/1920px-Central_Taiwan_official_determined.svg.png",  
+        "南部": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Southern_Taiwan_official_determined.svg/1920px-Southern_Taiwan_official_determined.svg.png",  
+        "東部": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Eastern_Taiwan_official_determined.svg/1920px-Eastern_Taiwan_official_determined.svg.png"   
+    }
     return {
         "type": "flex",
         "altText": f"請選擇{region}的縣市",
         "contents": {
             "type": "bubble",
+            "hero": {
+                "type": "image",
+                "url": region_images[region],
+                "size": "full",
+                "aspectRatio": "20:13",
+                "aspectMode": "cover"
+            },
             "body": {
                 "type": "box",
                 "layout": "vertical",
+                "spacing": "md",
                 "contents": [
                     {
                         "type": "text",
-                        "text": f"告訴我{region}的哪裡吧！🏙️",
-                        "weight": "bold",
+                        "text": f"偷偷跟我說{region}哪裡",
                         "size": "xl",
+                        "weight": "bold",
                         "align": "center",
-                        "color": "#1D7D81"
+                        "color": "#905c44"
                     },
                     {
                         "type": "box",
                         "layout": "vertical",
-                        "margin": "lg",
                         "spacing": "sm",
                         "contents": [
                             {
-                                "type": "button",
-                                "style": "primary",
-                                "color": "#1D7D81",
-                                "action": {
-                                    "type": "postback",
-                                    "label": city,
-                                    "data": json.dumps({
-                                        "action": "select_city",
-                                        "city": city
-                                    }),
-                                    "displayText": city
-                                },
-                                "margin": "sm"
+                                "type": "box",
+                                "layout": "vertical",
+                                "backgroundColor": "#f5f5f5",
+                                "cornerRadius": "lg",
+                                "paddingAll": "md",
+                                "contents": [
+                                    {
+                                        "type": "button",
+                                        "action": {
+                                            "type": "postback",
+                                            "label": city,
+                                            "data": json.dumps({
+                                                "action": "select_city",
+                                                "city": city
+                                            }),
+                                            "displayText": city
+                                        },
+                                        "style": "link",
+                                        "color": "#905c44",
+                                        "height": "sm"
+                                    }
+                                ]
                             } for city in REGION_CITIES[region]
                         ]
                     }
@@ -164,43 +208,64 @@ def create_city_selection(region):
 
 def create_altitude_selection():
     """創建海拔選擇介面"""
+    altitude_display = {
+        "高海拔": "我想去高山上露營！",
+        "低海拔": "平地營地最適合我！",
+        "兩者皆可": "海拔高低都可以～"
+    }
     return {
         "type": "flex",
         "altText": "請選擇海拔高度",
         "contents": {
             "type": "bubble",
+            "hero": {
+                "type": "image",
+                "url": "https://i.pinimg.com/736x/6b/6a/f1/6b6af12461bd255b02733b79915a69e3.jpg",
+                "size": "full",
+                "aspectRatio": "20:13",
+                "aspectMode": "cover"
+            },
             "body": {
                 "type": "box",
                 "layout": "vertical",
+                "spacing": "md",
                 "contents": [
                     {
                         "type": "text",
-                        "text": "適合你的海拔高度⛰️",
-                        "weight": "bold",
+                        "text": "選擇海拔高度",
                         "size": "xl",
+                        "weight": "bold",
                         "align": "center",
-                        "color": "#1D7D81"
+                        "color": "#905c44"
                     },
                     {
                         "type": "box",
                         "layout": "vertical",
-                        "margin": "lg",
                         "spacing": "sm",
                         "contents": [
                             {
-                                "type": "button",
-                                "style": "primary",
-                                "color": "#1D7D81",
-                                "action": {
-                                    "type": "postback",
-                                    "label": altitude,
-                                    "data": json.dumps({
-                                        "action": "select_altitude",
-                                        "altitude": altitude
-                                    }),
-                                    "displayText": altitude
-                                },
-                                "margin": "sm"
+                                "type": "box",
+                                "layout": "vertical",
+                                "backgroundColor": "#f5f5f5",
+                                "cornerRadius": "lg",
+                                "paddingAll": "md",
+                                "contents": [
+                                    {
+                                        "type": "button",
+                                        "action": {
+                                            "type": "postback",
+                                            "label": altitude,
+                                            "data": json.dumps({
+                                                "action": "select_altitude",
+                                                "altitude": altitude
+                                            }),
+                                            "displayText": altitude_display[altitude]
+                                        },
+                                        "style": "link",
+                                        "color": "#905c44",
+                                        "height": "sm"
+                                    }
+                                ]
                             } for altitude in ["高海拔", "低海拔", "兩者皆可"]
                         ]
                     }
@@ -211,43 +276,64 @@ def create_altitude_selection():
 
 def create_pet_selection():
     """創建寵物選擇介面"""
+    pet_display = {
+        "可帶寵物": "我要帶毛小孩一起去！",
+        "不可帶寵物": "無法敵擋毛小孩",
+        "兩者皆可": "有沒有寵物都可以！"
+    }
     return {
         "type": "flex",
         "altText": "請選擇是否可帶寵物",
         "contents": {
             "type": "bubble",
+            "hero": {
+                "type": "image",
+                "url": "https://i.pinimg.com/736x/70/c3/7c/70c37c051c0aaff0bf5c96d0057d82aa.jpg",
+                "size": "full",
+                "aspectRatio": "20:13",
+                "aspectMode": "cover"
+            },
             "body": {
                 "type": "box",
                 "layout": "vertical",
+                "spacing": "md",
                 "contents": [
                     {
                         "type": "text",
-                        "text": "有可愛的毛小孩嗎？🐾",
-                        "weight": "bold",
+                        "text": "希望有毛小孩嗎",
                         "size": "xl",
+                        "weight": "bold",
                         "align": "center",
-                        "color": "#1D7D81"
+                        "color": "#905c44"
                     },
                     {
                         "type": "box",
                         "layout": "vertical",
-                        "margin": "lg",
                         "spacing": "sm",
                         "contents": [
                             {
-                                "type": "button",
-                                "style": "primary",
-                                "color": "#1D7D81",
-                                "action": {
-                                    "type": "postback",
-                                    "label": pet_option,
-                                    "data": json.dumps({
-                                        "action": "select_pet",
-                                        "pet": pet_option
-                                    }),
-                                    "displayText": pet_option
-                                },
-                                "margin": "sm"
+                                "type": "box",
+                                "layout": "vertical",
+                                "backgroundColor": "#f5f5f5",
+                                "cornerRadius": "lg",
+                                "paddingAll": "md",
+                                "contents": [
+                                    {
+                                        "type": "button",
+                                        "action": {
+                                            "type": "postback",
+                                            "label": pet_option,
+                                            "data": json.dumps({
+                                                "action": "select_pet",
+                                                "pet": pet_option
+                                            }),
+                                            "displayText": pet_display[pet_option]
+                                        },
+                                        "style": "link",
+                                        "color": "#905c44",
+                                        "height": "sm"
+                                    }
+                                ]
                             } for pet_option in ["可帶寵物", "不可帶寵物", "兩者皆可"]
                         ]
                     }
@@ -258,44 +344,113 @@ def create_pet_selection():
 
 def create_parking_selection():
     """創建停車選擇介面"""
+    parking_display = {
+        "車停營位旁": "想把車停在帳篷旁邊！",
+        "集中停車": "集中停車也不錯～",
+        "兩者皆可": "停車方式都可以！"
+    }
     return {
         "type": "flex",
         "altText": "請選擇停車方式",
         "contents": {
             "type": "bubble",
+            "hero": {
+                "type": "image",
+                "url": "https://i.pinimg.com/736x/49/ad/ca/49adcaf22616ca09e6fe04e27c4f3fc7.jpg",
+                "size": "full",
+                "aspectRatio": "20:13",
+                "aspectMode": "cover"
+            },
             "body": {
                 "type": "box",
                 "layout": "vertical",
+                "spacing": "md",
                 "contents": [
                     {
                         "type": "text",
-                        "text": "想不想做苦力活？🅿️",
-                        "weight": "bold",
+                        "text": "停車方式",
                         "size": "xl",
+                        "weight": "bold",
                         "align": "center",
-                        "color": "#1D7D81"
+                        "color": "#905c44"
                     },
                     {
                         "type": "box",
                         "layout": "vertical",
-                        "margin": "lg",
                         "spacing": "sm",
                         "contents": [
                             {
+                                "type": "box",
+                                "layout": "vertical",
+                                "backgroundColor": "#f5f5f5",
+                                "cornerRadius": "lg",
+                                "paddingAll": "md",
+                                "contents": [
+                                    {
+                                        "type": "button",
+                                        "action": {
+                                            "type": "postback",
+                                            "label": parking_option,
+                                            "data": json.dumps({
+                                                "action": "select_parking",
+                                                "parking": parking_option
+                                            }),
+                                            "displayText": parking_display[parking_option]
+                                        },
+                                        "style": "link",
+                                        "color": "#905c44",
+                                        "height": "sm"
+                                    }
+                                ]
+                            } for parking_option in ["車停營位旁", "集中停車", "兩者皆可"]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+
+def create_search_button():
+    """創建搜索營地按鈕"""
+    return {
+        "type": "flex",
+        "altText": "開始搜尋營地",
+        "contents": {
+            "type": "bubble",
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "spacing": "md",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "施展魔法吧！",
+                        "size": "xl",
+                        "weight": "bold",
+                        "align": "center",
+                        "color": "#905c44"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "backgroundColor": "#f5f5f5",
+                        "cornerRadius": "lg",
+                        "paddingAll": "md",
+                        "contents": [
+                            {
                                 "type": "button",
-                                "style": "primary",
-                                "color": "#1D7D81",
                                 "action": {
                                     "type": "postback",
-                                    "label": parking_option,
+                                    "label": "GO！",
                                     "data": json.dumps({
-                                        "action": "select_parking",
-                                        "parking": parking_option
+                                        "action": "search_start"
                                     }),
-                                    "displayText": parking_option
+                                    "displayText": "GO！"
                                 },
-                                "margin": "sm"
-                            } for parking_option in ["車停營位旁", "集中停車", "兩者皆可"]
+                                "style": "link",
+                                "color": "#905c44",
+                                "height": "sm"
+                            }
                         ]
                     }
                 ]
@@ -310,32 +465,38 @@ def create_go_button():
         "altText": "開始搜尋",
         "contents": {
             "type": "bubble",
+            "hero": {
+                "type": "image",
+                "url": "https://i.imgur.com/dGto3z1.jpg",
+                "size": "full",
+                "aspectRatio": "20:13",
+                "aspectMode": "cover"
+            },
             "body": {
                 "type": "box",
                 "layout": "vertical",
+                "spacing": "md",
                 "contents": [
                     {
                         "type": "text",
-                        "text": "施展魔法吧！🪄",
-                        "weight": "bold",
+                        "text": "開始探索",
                         "size": "xl",
+                        "weight": "bold",
                         "align": "center",
-                        "color": "#1D7D81",
-                        "margin": "md"
+                        "color": "#905c44"
                     },
                     {
                         "type": "button",
-                        "style": "primary",
-                        "color": "#1D7D81",
                         "action": {
                             "type": "postback",
-                            "label": "GO！",
+                            "label": "搜尋營地",
                             "data": json.dumps({
                                 "action": "search_start"
                             }),
-                            "displayText": "GO！"
+                            "displayText": "搜尋營地"
                         },
-                        "margin": "lg"
+                        "style": "primary",
+                        "color": "#905c44"
                     }
                 ]
             }
@@ -435,43 +596,86 @@ def handle_postback(event, Campsite):
                 user_states[user_id] = {}
             user_states[user_id]["parking"] = data.get("parking", "兩者皆可")
             user_states[user_id]["step"] = "go"
-            send_line_message(event["replyToken"], [create_go_button()])
+            send_line_message(event["replyToken"], [create_search_button()])
             
         # 處理搜尋開始
         elif data.get("action") == "search_start":
             state = user_states.get(user_id, {})
-            if not state or "city" not in state:
-                send_line_message(event["replyToken"], [{"type": "text", "text": "請重新開始搜尋流程"}])
-                return
-                
-            # 構建搜尋關鍵字
-            keywords = []
             
-            # 使用選擇的縣市
-            keywords.append(state.get("city", ""))
-            
-            # 處理其他條件
-            if state.get("altitude") and state["altitude"] != "兩者皆可":
-                keywords.append(state["altitude"])
-            if state.get("pet") and state["pet"] != "兩者皆可":
-                keywords.append(state["pet"])
-            if state.get("parking") and state["parking"] != "兩者皆可":
-                keywords.append(state["parking"])
-                
-            # 執行搜尋
-            search_text = " ".join(filter(None, keywords))
-            campsites = Campsite.search_by_keywords(search_text)
-            
-            if not campsites:
+            # 檢查用戶狀態是否完整
+            if (not state or 
+                "city" not in state or 
+                not state.get("city") or 
+                "step" not in state or 
+                state.get("step") != "go"):
+                # 初始化用戶狀態並顯示地區選擇介面
+                user_states[user_id] = {
+                    "step": "region",
+                    "region": None,
+                    "city": None,
+                    "altitude": None,
+                    "pet": None,
+                    "parking": None
+                }
                 send_line_message(
                     event["replyToken"],
-                    [{"type": "text", "text": "抱歉，找不到符合條件的營區。請嘗試放寬搜尋條件。"}]
+                    [
+                        {"type": "text", "text": "讓我們重新開始搜尋吧！🔍\n請先選擇想去的地區："},
+                        create_location_selection()
+                    ]
                 )
-            else:
-                # 清除用戶狀態
-                user_states.pop(user_id, None)
-                # 顯示搜尋結果
-                return handle_search_results(event["replyToken"], campsites, 1, search_text)
+                return
+
+            try:
+                # 構建搜尋關鍵字
+                keywords = []
+                
+                # 使用選擇的縣市
+                city = state.get("city")
+                if city:
+                    keywords.append(city)
+                
+                # 處理其他條件
+                if state.get("altitude") and state["altitude"] != "兩者皆可":
+                    keywords.append(state["altitude"])
+                if state.get("pet") and state["pet"] != "兩者皆可":
+                    keywords.append(state["pet"])
+                if state.get("parking") and state["parking"] != "兩者皆可":
+                    keywords.append(state["parking"])
+                
+                # 執行搜尋
+                search_text = " ".join(filter(None, keywords))
+                logger.info(f"搜尋條件: {search_text}")  # 添加日誌
+                campsites = Campsite.search_by_keywords(search_text)
+                logger.info(f"找到 {len(campsites)} 個營區")  # 添加日誌
+                
+                if not campsites:
+                    send_line_message(
+                        event["replyToken"],
+                        [{
+                            "type": "text", 
+                            "text": f"抱歉，找不到符合以下條件的營區：\n- 地區：{city}\n" + 
+                                   (f"- 海拔：{state['altitude']}\n" if state.get('altitude') and state['altitude'] != '兩者皆可' else "") +
+                                   (f"- 寵物：{state['pet']}\n" if state.get('pet') and state['pet'] != '兩者皆可' else "") +
+                                   (f"- 停車：{state['parking']}" if state.get('parking') and state['parking'] != '兩者皆可' else "") +
+                                   "\n請嘗試放寬搜尋條件。"
+                        }]
+                    )
+                else:
+                    # 清除用戶狀態
+                    user_states.pop(user_id, None)
+                    # 顯示搜尋結果
+                    return handle_search_results(event["replyToken"], campsites, 1, search_text)
+                    
+            except Exception as e:
+                logger.error(f"搜尋過程中發生錯誤: {str(e)}")
+                send_line_message(
+                    event["replyToken"],
+                    [{
+                        "type": "text", 
+                        "text": "抱歉，搜尋過程中發生錯誤。請重新搜尋。"
+                    }]
+                )
             
     except Exception as e:
         logger.error(f"處理 postback 時發生錯誤: {str(e)}")
@@ -517,7 +721,7 @@ def handle_search_results(reply_token, campsites, current_page, keyword):
                         "weight": "bold",
                         "size": "xxl",
                         "wrap": True,
-                        "color": "#1D7D81"
+                        "color": "#905c44"
                     },
                     {
                         "type": "box",
@@ -693,7 +897,7 @@ def handle_search_results(reply_token, campsites, current_page, keyword):
                         "type": "button",
                         "style": "primary",
                         "height": "sm",
-                        "color": "#1D7D81",
+                        "color": "#905c44",
                         "margin": "lg",
                         "action": {
                             "type": "uri",
