@@ -211,7 +211,7 @@ def update_data():
 @app.route("/health")
 def health_check():
     """健康檢查端點"""
-    return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()})
+    return {"status": "healthy"}, 200
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -248,5 +248,6 @@ def internal_error(error):
 
 
 if __name__ == "__main__":
-    # 啟動應用
-    app.run(host="0.0.0.0", port=int(os.getenv('PORT', 3000)), debug=True)
+    # 使用與 gunicorn 相同的端口
+    port = int(os.getenv('PORT', 13215))
+    app.run(host="0.0.0.0", port=port, debug=False)
