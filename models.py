@@ -3,6 +3,8 @@ import re
 from typing import List, Dict, Any
 import os
 from dotenv import load_dotenv
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # 載入環境變數
 load_dotenv()
@@ -17,6 +19,35 @@ client = MongoClient(
 )
 db = client[os.getenv("MONGODB_DB")]
 collection = db[os.getenv("MONGODB_COLLECTION")]
+users = db['users']  # 新增用戶集合
+
+class User(UserMixin):
+    def __init__(self, username):
+        self.username = username
+        self.id = username
+
+    @staticmethod
+    def get(username):
+        user_data = users.find_one({"username": username})
+        if not user_data:
+            return None
+        return User(username=user_data['username'])
+
+    @staticmethod
+    def create(username, password_hash):
+        if users.find_one({"username": username}):
+            return False
+        users.insert_one({
+            "username": username,
+            "password": password_hash
+        })
+        return True
+
+    def check_password(self, password):
+        user_data = users.find_one({"username": self.username})
+        if not user_data:
+            return False
+        return check_password_hash(user_data['password'], password)
 
 
 class Campsite:

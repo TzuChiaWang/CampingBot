@@ -10,6 +10,12 @@ from models import Campsite
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# 圖片驗證設定
+FILTERED_KEYWORDS = ["banner", "logo", "icon", "button", "ad", "advertisement"]
+MIN_IMAGE_SIZE = 50 * 1024  # 50KB
+MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
+VALID_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"]
+
 # HTML 分頁的 URL
 PAGE_URLS = [
     # 新北市
@@ -245,22 +251,42 @@ def scrape_campsite():
 
         def validate_and_add_image(url):
             """驗證並添加圖片URL"""
-            if any(keyword in url.lower() for keyword in filtered_keywords):
+            # 檢查是否包含過濾關鍵字
+            if any(keyword in url.lower() for keyword in FILTERED_KEYWORDS):
+                logger.info(f"圖片URL包含過濾關鍵字，跳過: {url}")
                 return False
-            if url.lower().endswith(".gif"):
-                return False
+
             try:
-                img_response = requests.head(url, headers=HTML_HEADERS, timeout=5)
-                if (
-                    img_response.status_code == 200
-                    and "image" in img_response.headers.get("content-type", "")
-                ):
+                # 先用 HEAD 請求檢查檔案類型和大小
+                head_response = requests.head(url, headers=HTML_HEADERS, timeout=5)
+                if head_response.status_code != 200:
+                    logger.info(f"圖片URL無法訪問，跳過: {url}")
+                    return False
+
+                content_type = head_response.headers.get("content-type", "")
+                if not content_type.startswith("image/"):
+                    logger.info(f"非圖片類型，跳過: {url}")
+                    return False
+
+                # 檢查檔案大小（如果有提供）
+                content_length = int(head_response.headers.get("content-length", 0))
+                if content_length > 0:  # 只有當有提供檔案大小時才檢查
+                    if content_length < MIN_IMAGE_SIZE:
+                        logger.info(f"圖片太小，跳過: {url}")
+                        return False
+                    if content_length > MAX_IMAGE_SIZE:
+                        logger.info(f"圖片太大，跳過: {url}")
+                        return False
+
+                # 如果通過所有檢查，添加到有效圖片列表
+                if url not in valid_image_urls:  # 避免重複添加
                     valid_image_urls.append(url)
                     logger.info(f"驗證有效的圖片URL: {url}")
-                    return True
+                return True
+
             except Exception as e:
                 logger.error(f"檢查圖片URL時發生錯誤: {url}, 錯誤: {str(e)}")
-            return False
+                return False
 
         # 優先從輪播圖獲取圖片
         carousel_images = soup.select("#myCarousel .carousel-inner img, .carousel img")

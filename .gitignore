@@ -19,6 +19,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+generate_password.py
 
 # Virtual Environment
 venv/

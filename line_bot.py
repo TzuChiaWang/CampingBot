@@ -72,9 +72,9 @@ def create_location_selection():
     """創建地區選擇介面"""
     region_display = {
         "北部": "我想去北部露營！",
-        "中部": "中部的營地聽起來不錯！",
+        "中部": "去中部享受大自然！",
         "南部": "南部陽光真好！",
-        "東部": "去東部享受大自然！"
+        "東部": "看東部的海！"
     }
     return {
         "type": "flex",
@@ -83,7 +83,7 @@ def create_location_selection():
             "type": "bubble",
             "hero": {
                 "type": "image",
-                "url": "https://i.imgur.com/GspFcEp.jpeg",  
+                "url": "https://i.pinimg.com/736x/4a/4c/74/4a4c7402eadeaf088689a4123d2458b0.jpg",  
                 "size": "full",
                 "aspectRatio": "20:13",
                 "aspectMode": "cover"
@@ -140,10 +140,10 @@ def create_location_selection():
 def create_city_selection(region):
     """創建縣市選擇介面"""
     region_images = {
-        "北部": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Northern_Taiwan_official_determined.svg/1920px-Northern_Taiwan_official_determined.svg.png",  
-        "中部": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Central_Taiwan_official_determined.svg/1920px-Central_Taiwan_official_determined.svg.png",  
-        "南部": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Southern_Taiwan_official_determined.svg/1920px-Southern_Taiwan_official_determined.svg.png",  
-        "東部": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Eastern_Taiwan_official_determined.svg/1920px-Eastern_Taiwan_official_determined.svg.png"   
+        "北部": "https://i.pinimg.com/736x/90/e5/c3/90e5c33650b6d47d4d1684e647aa360c.jpg",  
+        "中部": "https://i.pinimg.com/1200x/c2/76/11/c276110d1c0ffca4f65c1d7550b5c666.jpg",  
+        "南部": "https://i.pinimg.com/1200x/50/4e/d5/504ed577905484b9f87d12a2d6ac2fe4.jpg",  
+        "東部": "https://i.pinimg.com/1200x/ff/9b/94/ff9b947da12a9926e49be5319f66029b.jpg"   
     }
     return {
         "type": "flex",
@@ -164,7 +164,7 @@ def create_city_selection(region):
                 "contents": [
                     {
                         "type": "text",
-                        "text": f"偷偷跟我說{region}哪裡",
+                        "text": f"偷偷跟我說去{region}哪裡",
                         "size": "xl",
                         "weight": "bold",
                         "align": "center",
@@ -953,7 +953,7 @@ def handle_search_results(reply_token, campsites, current_page, keyword):
                         "size": "xl",
                         "weight": "bold",
                         "align": "center",
-                        "color": "#1D7D81"
+                        "color": "#905c44"
                     },
                     {
                         "type": "text",
@@ -974,7 +974,7 @@ def handle_search_results(reply_token, campsites, current_page, keyword):
                     {
                         "type": "button",
                         "style": "primary",
-                        "color": "#1D7D81",
+                        "color": "#905c44",
                         "action": {
                             "type": "postback",
                             "label": "下一頁",

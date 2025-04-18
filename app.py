@@ -10,8 +10,8 @@ from flask import (
     jsonify,
 )
 
-from forms import CampsiteForm
-from models import Campsite
+from forms import CampsiteForm, LoginForm
+from models import Campsite, User
 import requests
 import json
 import logging
@@ -23,6 +23,7 @@ import secrets
 import os
 from scraper import save_campsite
 from datetime import datetime
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 # 載入環境變數
 load_dotenv()
@@ -33,6 +34,17 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = secrets.token_hex(32)  # 每次啟動時生成新的 64 字符密鑰
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key')
+
+# 初始化 Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = '請先登入'
+
+@login_manager.user_loader
+def load_user(username):
+    return User.get(username)
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -74,6 +86,7 @@ def index():
 
 
 @app.route("/add", methods=["GET", "POST"])
+@login_required
 def add_campsite():
     form = CampsiteForm()
     if form.validate_on_submit():
@@ -103,6 +116,7 @@ def add_campsite():
 
 
 @app.route("/edit/<id>", methods=["GET", "POST"])
+@login_required
 def edit_campsite(id):
     try:
         object_id = ObjectId(id)
@@ -120,6 +134,12 @@ def edit_campsite(id):
             if field == "image_url" and "image_urls" in campsite:
                 # 將圖片URL列表轉換為逗號分隔的字符串
                 form._fields[field].data = ", ".join(campsite["image_urls"])
+            elif field == "signal_strength" and "signal_strength" in campsite:
+                # 如果是字串，先轉換為列表
+                if isinstance(campsite["signal_strength"], str):
+                    form._fields[field].data = [s.strip() for s in campsite["signal_strength"].split(',')]
+                else:
+                    form._fields[field].data = campsite["signal_strength"]
             elif field in campsite:
                 form._fields[field].data = campsite[field]
 
@@ -147,6 +167,7 @@ def edit_campsite(id):
 
 
 @app.route("/delete/<id>")
+@login_required
 def delete_campsite(id):
     try:
         object_id = ObjectId(id)
@@ -175,6 +196,7 @@ def image_proxy():
 
 
 @app.route("/update_data")
+@login_required
 def update_data():
     """更新營區資料"""
     try:
@@ -192,6 +214,29 @@ def health_check():
     return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()})
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.get(form.username.data)
+        if user and user.check_password(form.password.data):
+            login_user(user)
+            flash('登入成功！', 'success')
+            return redirect(url_for('index'))
+        flash('使用者名稱或密碼錯誤', 'danger')
+    return render_template('login.html', form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('您已登出', 'info')
+    return redirect(url_for('index'))
+
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template("404.html"), 404
@@ -203,5 +248,13 @@ def internal_error(error):
 
 
 if __name__ == "__main__":
-    # 只在本地開發環境使用 Flask 開發服務器
+    # 初始化管理員帳號
+    admin_username = os.getenv("ADMIN_USERNAME")
+    admin_password_hash = os.getenv("ADMIN_PASSWORD_HASH")
+    if User.create(admin_username, admin_password_hash):
+        print(f"管理員帳號 '{admin_username}' 創建成功！")
+    else:
+        print(f"管理員帳號 '{admin_username}' 已存在。")
+
+    # 啟動應用
     app.run(host="0.0.0.0", port=int(os.getenv('PORT', 3000)), debug=True)

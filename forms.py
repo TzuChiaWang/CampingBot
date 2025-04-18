@@ -1,6 +1,6 @@
 from random import choice
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, widgets
+from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, widgets, PasswordField
 from wtforms.validators import DataRequired, URL, Optional
 
 
@@ -23,15 +23,14 @@ class CampsiteForm(FlaskForm):
                                          ("亞太", "亞太"),
                                          ("WIFI", "WIFI"),
                                          ("無資訊", "無資訊"),
-                                     ],
-                                     validators=[DataRequired(message="請至少選擇一個通訊選項")])
+                                     ])
     pets = SelectField("攜帶寵物規定", 
                       choices=[
                           ("全區不可帶寵物", "全區不可帶寵物"),
                           ("自搭帳可帶寵物", "自搭帳可帶寵物")
                       ],
                       validators=[DataRequired(message="請選擇寵物規定")])
-    facilities = StringField("附屬設施", validators=[DataRequired(message="請輸入附屬設施")])
+    facilities = StringField("附屬設施")
     sideservice = StringField("附屬服務")
     open_time = StringField("營業時間")
     parking = SelectField("停車方式", 
@@ -44,3 +43,8 @@ class CampsiteForm(FlaskForm):
     booking_url = StringField("訂位網址", validators=[DataRequired(message="請輸入訂位網址"), URL(message="請輸入有效的網址")])
     social_url = StringField("社群網址", validators=[Optional(), URL(message="請輸入有效的網址")])
     submit = SubmitField("提交")
+
+
+class LoginForm(FlaskForm):
+    username = StringField('使用者名稱', validators=[DataRequired(message='請輸入使用者名稱')])
+    password = PasswordField('密碼', validators=[DataRequired(message='請輸入密碼')])
