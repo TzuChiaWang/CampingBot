@@ -77,12 +77,29 @@ def callback():
 
 @app.route("/")
 def index():
-    query = request.args.get("q", "")
-    if query:
-        campsites = Campsite.search(query)
+    page = int(request.args.get("page", 1))
+    per_page = 12
+    q = request.args.get("q", "")
+
+    # 使用與 LINE Bot 相同的搜尋邏輯
+    if q:
+        campsites_all = Campsite.search_by_keywords(q)
     else:
-        campsites = Campsite.get_all()
-    return render_template("index.html", campsites=campsites)
+        campsites_all = Campsite.get_all()
+
+    total = len(campsites_all)
+    total_pages = (total + per_page - 1) // per_page
+    start = (page - 1) * per_page
+    end = start + per_page
+    campsites = campsites_all[start:end]
+
+    return render_template(
+        "index.html",
+        campsites=campsites,
+        page=page,
+        total_pages=total_pages,
+        q=q
+    )
 
 
 @app.route("/add", methods=["GET", "POST"])

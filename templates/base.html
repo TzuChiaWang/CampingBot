@@ -3,6 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='Camping-Icon.png') }}"
+      sizes="5x5"
+    />
     <title>回憶露</title>
     <!-- Bootstrap 5 CSS -->
     <link
@@ -15,24 +22,87 @@
       rel="stylesheet"
     />
     <style>
+      :root {
+        --primary-color: #905c44;
+        --primary-dark: #744a37;
+        --primary-light: #a67a62;
+        --accent-color: #d4b08c;
+      }
+
       body {
         background-color: #f8f9fa;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
       }
+      .navbar {
+        padding: 0.5rem 1rem;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        background-color: var(--primary-color) !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
       .navbar-brand {
-        font-size: 1.5rem;
+        font-size: 2rem;
         font-weight: bold;
+        display: flex;
+        align-items: center;
+        padding: 0;
+        height: 100%;
+        color: #fff !important;
+      }
+      .navbar-brand:hover {
+        color: var(--accent-color) !important;
+      }
+      .navbar-brand img {
+        height: 100px;
+        width: auto;
+        margin-right: 1rem;
+        transform: scale(1.2);
+        transform-origin: left center;
       }
       .nav-link {
         font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9) !important;
+        transition: color 0.3s ease;
+      }
+      .nav-link:hover {
+        color: var(--accent-color) !important;
+      }
+      .line-id {
+        display: flex;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.9) !important;
+        margin-left: 1rem;
+      }
+      .line-id img {
+        height: 24px;
+        width: auto;
+        margin-right: 0.5rem;
       }
       .footer {
         margin-top: auto;
         padding: 1rem 0;
-        background-color: #343a40;
+        background-color: var(--primary-dark);
         color: white;
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .btn-primary {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        background-color: var(--primary-dark) !important;
+        border-color: var(--primary-dark) !important;
+      }
+      .bg-primary {
+        background-color: var(--primary-color) !important;
+      }
+      .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
       .main-content {
         flex: 1;
@@ -52,7 +122,13 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container">
         <a class="navbar-brand" href="{{ url_for('index') }}">
-          <i class="fas fa-campground me-2"></i>回憶露-露營區推薦
+          <img
+            src="{{ url_for('static', filename='logo.png') }}"
+            alt="回憶露"
+            height="100"
+            class="d-inline-block align-text-top me-2"
+          />
+          回憶露
         </a>
         <button
           class="navbar-toggler"
@@ -70,19 +146,26 @@
               </a>
             </li>
             {% if current_user.is_authenticated %}
-              <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('logout') }}">
-                  <i class="fas fa-sign-out-alt me-1"></i>登出
-                </a>
-              </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}">
+                <i class="fas fa-sign-out-alt me-1"></i>登出
+              </a>
+            </li>
             {% else %}
-              <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('login') }}">
-                  <i class="fas fa-sign-in-alt me-1"></i>登入
-                </a>
-              </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('login') }}">
+                <i class="fas fa-sign-in-alt me-1"></i>登入
+              </a>
+            </li>
             {% endif %}
           </ul>
+          <div class="line-id">
+            <img
+              src="{{ url_for('static', filename='Line-Icon.png') }}"
+              alt="LINE"
+            />
+            <span>ID: @189dsoqf</span>
+          </div>
         </div>
       </div>
     </nav>
@@ -115,7 +198,7 @@
     <footer class="footer">
       <div class="container text-center">
         <p class="mb-0">
-          &copy; 2025 回憶露-露營營區推薦. All rights reserved.
+          &copy; 2025 回憶露 Tzuchia & Dewei. All rights reserved.
         </p>
       </div>
     </footer>

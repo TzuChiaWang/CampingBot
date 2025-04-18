@@ -306,6 +306,27 @@
     </div>
     {% endfor %}
   </div>
+
+  <!-- 分頁按鈕 -->
+  <div class="pagination justify-content-center mt-4">
+    <ul class="pagination">
+      {% if page > 1 %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('index', page=page-1, q=q) }}">上一頁</a>
+        </li>
+      {% endif %}
+      {% for p in range(1, total_pages + 1) %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+          <a class="page-link" href="{{ url_for('index', page=p, q=q) }}">{{ p }}</a>
+        </li>
+      {% endfor %}
+      {% if page < total_pages %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('index', page=page+1, q=q) }}">下一頁</a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
 </div>
 {% endblock %}
 
