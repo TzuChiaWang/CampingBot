@@ -1,91 +1,86 @@
-# CampingBot 露營資訊 LINE 機器人
+# CampingBot 露營資訊平台
 
-這是一個基於 LINE Messaging API 開發的露營資訊查詢機器人，提供智能營地搜尋、照片瀏覽等功能。
+這是一個多平台的露營資訊查詢系統，同時提供網頁介面和 LINE 機器人服務：
+
+- 💻 網頁平台：提供完整的營地搜尋、篩選和預訂功能
+- 📱 LINE 機器人：隨時隨地快速查詢營地資訊
 
 ## 功能特點
 
-- 🔍 智能搜尋功能
-  - 關鍵字搜尋（如：螢火蟲、日出等）
-  - 智能篩選系統
-  - 分頁瀏覽功能
+- 🌐 雙平台整合
+
+  - 網頁介面支援詳細營地瀏覽和進階搜尋
+  - LINE 機器人提供互動式選單搜尋
+  - 資料同步更新，體驗一致
+
+- 🔍 智能搜尋系統
+
+  - 網頁平台：關鍵字快速搜尋
+  - LINE 機器人：
+    - 互動式地區選擇（北中南東）
+    - 縣市篩選功能
+    - 海拔高度選擇
+    - 特色功能篩選（寵物、停車等）
 
 - 🏕️ 營地資訊顯示
-  - 營地名稱與照片
-  - 地理位置與海拔
-  - 停車與設施資訊
-  - 社群連結與更多照片
+
+  - 營地名稱與精選照片
+  - 地理位置與海拔資訊
+  - 停車與設施介紹
+  - 立即預訂按鈕
+  - 更多照片瀏覽功能
 
 - 📱 優化使用者體驗
+
   - 美觀的 Flex Message 卡片
-  - 輪播式照片展示
-  - 分頁導覽按鈕
+  - 輪播式營地展示
   - 智能篩選介面
+  - 一鍵預訂功能
 
 - 💾 資料庫整合
   - MongoDB 資料儲存
-  - 營地資訊管理
-  - 照片 URL 管理
-  - 關鍵字索引優化
+  - 完整營地資訊管理
+  - 照片庫管理
+  - 關鍵字搜尋優化
 
 ## 使用方式
 
-1. 加入好友：
-   - 掃描 QR Code 或搜尋 LINE ID 加入好友
+1. 網頁平台：
 
-2. 開始使用：
-   - 輸入關鍵字搜尋營地（例如：「螢火蟲」、「雲海」）
-   - 使用篩選功能縮小搜尋範圍
-   - 點擊「下一頁」瀏覽更多結果
-   - 點擊「查看更多照片」連結至社群媒體
+   - 瀏覽首頁查看所有營地
+   - 使用搜尋欄位輸入關鍵字
+   - 點擊營地卡片查看詳細資訊
+   - 使用預訂按鈕聯繫營地
+
+2. LINE 機器人：
+   - 掃描 QR Code 或搜尋 LINE ID 加入好友
+   - 透過互動式選單尋找理想營地：
+     - 選擇想要的地區（北中南東）
+     - 選擇特定縣市
+     - 選擇海拔高度
+     - 選擇特色功能（如寵物、停車需求）
+   - 瀏覽搜尋結果，每個營地提供：
+     - 立即預訂功能
+     - Google Map 位置查看
 
 ## 安裝說明
 
 1. 克隆專案
+
 ```bash
 git clone https://github.com/TzuChiaWang/CampingBot.git
 cd CampingBot
 ```
 
 2. 安裝依賴
+
 ```bash
 pip install -r requirements.txt
 ```
 
 3. 環境設定
-- 複製 `.env.example` 到 `.env`
-- 填入必要的環境變數：
-  - LINE Bot 設定
-  - MongoDB 連接資訊
-  - Flask 設定
-  - Ngrok URL（開發時使用）
 
-```bash
-cp .env.example .env
-# 編輯 .env 文件填入相關設定
-```
-
-## 環境變數說明
-
-- `LINE_CHANNEL_ACCESS_TOKEN`: LINE Bot 的 Channel Access Token
-- `LINE_CHANNEL_SECRET`: LINE Bot 的 Channel Secret
-- `MONGODB_URI`: MongoDB 連接字串
-- `MONGODB_DB`: MongoDB 資料庫名稱
-- `MONGODB_COLLECTION`: MongoDB 集合名稱
-- `FLASK_SECRET_KEY`: Flask 應用的密鑰
-- `NGROK_URL`: Ngrok 的 URL（開發環境使用）
-
-## 開發環境設置
-
-1. 安裝 ngrok（用於開發測試）
-2. 啟動 Flask 應用
-```bash
-python app.py
-```
-3. 啟動 ngrok
-```bash
-ngrok http 3000
-```
-4. 將 ngrok 提供的 URL 設定到 LINE Developer Console
+- 到 `.env` 並填入必要的 LINE_CHANNEL_ACCESS_TOKEN 和 LINE_CHANNEL_SECRET 與 MONGODB 環境變數
 
 ## 專案結構
 
@@ -94,7 +89,7 @@ CampingBot/
 ├── app.py              # 主應用程式
 ├── line_bot.py         # LINE Bot 邏輯處理
 ├── models.py           # 資料模型與資料庫操作
-├── scraper.py         # 資料爬蟲
+├── scraper.py          # 資料爬蟲
 ├── requirements.txt    # 依賴套件
 └── .env.example       # 環境變數範例
 ```
@@ -108,7 +103,6 @@ CampingBot/
   - Carousel Messages
 - Flask Web Framework
 - MongoDB
-- Beautiful Soup（網頁爬蟲）
 
 ## 注意事項
 
@@ -118,7 +112,7 @@ CampingBot/
 
 ## 最新更新
 
-- 新增分頁功能，支援大量搜尋結果的瀏覽
-- 優化 UI/UX 設計，提供更直觀的使用體驗
-- 改進搜尋功能，支援更多關鍵字
-- 增加營地資訊的顯示內容
+- 優化搜尋結果顯示邏輯，根據結果數量自動調整顯示方式
+- 新增智能篩選系統，支援地區、海拔和特色篩選
+- 改進營地資訊卡片設計，新增立即預訂功能
+- 優化照片瀏覽體驗，支援更多照片的查看
