@@ -48,10 +48,12 @@
   .btn-group .btn {
     flex: 1;
     white-space: nowrap;
+    padding: 0.375rem;
+    font-size: 0.875rem;
   }
   .search-box {
     background-color: #fff;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
@@ -59,12 +61,14 @@
   .feature-badge {
     font-size: 0.8rem;
     margin: 2px;
+    display: inline-block;
   }
   .action-buttons {
     position: absolute;
     top: 10px;
     right: 10px;
     display: none;
+    z-index: 2;
   }
   .campsite-card:hover .action-buttons {
     display: block;
@@ -79,39 +83,73 @@
     border-radius: 50%;
     padding: 20px;
   }
+
+  @media (max-width: 768px) {
+    .search-box {
+      padding: 1rem;
+    }
+    .search-box .row > div {
+      margin-bottom: 1rem;
+    }
+    .search-box .row > div:last-child {
+      margin-bottom: 0;
+    }
+    .search-box .text-end {
+      text-align: center !important;
+    }
+    .btn-group {
+      flex-direction: column;
+    }
+    .btn-group .btn {
+      width: 100%;
+      margin: 0.25rem 0;
+    }
+    .card-img-top {
+      height: 150px;
+    }
+    .feature-badge {
+      font-size: 0.75rem;
+    }
+    .action-buttons {
+      display: block;
+      opacity: 0.8;
+    }
+  }
 </style>
 {% endblock %} 
 
 {% block content %}
 <div class="container">
   <div class="search-box">
-    <div class="row align-items-center">
-      <div class="col-md-6">
-        <form method="GET" action="{{ url_for('index') }}" class="d-flex">
+    <div class="row g-3">
+      <div class="col-12 col-md-6">
+        <form method="GET" action="{{ url_for('index') }}" class="d-flex gap-2">
           <input
             type="text"
             name="q"
-            class="form-control me-2"
+            class="form-control"
             placeholder="搜尋營區名稱、位置或特色"
             value="{{ request.args.get('q', '') }}"
           />
           <button
             type="submit"
             class="btn btn-primary d-flex align-items-center justify-content-center"
-            style="min-width: 120px"
+            style="min-width: 100px"
           >
-            <i class="fas fa-search me-2"></i> 搜尋
+            <i class="fas fa-search me-2"></i><span class="d-none d-sm-inline">搜尋</span>
           </button>
         </form>
       </div>
-      <div class="col-md-6 text-end">
+      <div class="col-12 col-md-6 text-center text-md-end">
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('add_campsite') }}" class="btn btn-success me-2">
-          <i class="fas fa-plus"></i> 新增營區
-        </a>
-        <a href="{{ url_for('update_data') }}" class="btn btn-secondary">
-          <i class="fas fa-sync"></i> 更新資料
-        </a>
+        <div class="d-grid d-md-block gap-2">
+          <a href="{{ url_for('add_campsite') }}" class="btn btn-success">
+            <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">新增營區</span>
+          </a>
+          <a href="{{ url_for('update_data') }}" class="btn btn-secondary">
+            <i class="fas fa-sync me-1"></i><span class="d-none d-sm-inline">更新資料</span>
+          </a>
+        </div>
         {% endif %}
       </div>
     </div>
@@ -309,23 +347,52 @@
 
   <!-- 分頁按鈕 -->
   <div class="pagination justify-content-center mt-4">
-    <ul class="pagination">
-      {% if page > 1 %}
-        <li class="page-item">
-          <a class="page-link" href="{{ url_for('index', page=page-1, q=q) }}">上一頁</a>
-        </li>
-      {% endif %}
-      {% for p in range(1, total_pages + 1) %}
-        <li class="page-item {% if p == page %}active{% endif %}">
-          <a class="page-link" href="{{ url_for('index', page=p, q=q) }}">{{ p }}</a>
-        </li>
-      {% endfor %}
-      {% if page < total_pages %}
-        <li class="page-item">
-          <a class="page-link" href="{{ url_for('index', page=page+1, q=q) }}">下一頁</a>
-        </li>
-      {% endif %}
-    </ul>
+    <nav aria-label="頁面導航">
+      <ul class="pagination flex-wrap">
+        {% if page > 1 %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('index', page=page-1, q=q) }}" aria-label="上一頁">
+              <span aria-hidden="true">&laquo;</span>
+              <span class="d-none d-sm-inline ms-1">上一頁</span>
+            </a>
+          </li>
+        {% endif %}
+
+        {% set start = [1, page - 2] | max %}
+        {% set end = [total_pages, page + 2] | min %}
+        
+        {% if start > 1 %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('index', page=1, q=q) }}">1</a></li>
+          {% if start > 2 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+          {% endif %}
+        {% endif %}
+
+        {% for p in range(start, end + 1) %}
+          <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('index', page=p, q=q) }}">{{ p }}</a>
+          </li>
+        {% endfor %}
+
+        {% if end < total_pages %}
+          {% if end < total_pages - 1 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+          {% endif %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('index', page=total_pages, q=q) }}">{{ total_pages }}</a>
+          </li>
+        {% endif %}
+
+        {% if page < total_pages %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('index', page=page+1, q=q) }}" aria-label="下一頁">
+              <span class="d-none d-sm-inline me-1">下一頁</span>
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
   </div>
 </div>
 {% endblock %}
