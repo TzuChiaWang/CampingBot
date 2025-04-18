@@ -248,13 +248,5 @@ def internal_error(error):
 
 
 if __name__ == "__main__":
-    # 初始化管理員帳號
-    admin_username = os.getenv("ADMIN_USERNAME")
-    admin_password_hash = os.getenv("ADMIN_PASSWORD_HASH")
-    if User.create(admin_username, admin_password_hash):
-        print(f"管理員帳號 '{admin_username}' 創建成功！")
-    else:
-        print(f"管理員帳號 '{admin_username}' 已存在。")
-
     # 啟動應用
     app.run(host="0.0.0.0", port=int(os.getenv('PORT', 3000)), debug=True)
