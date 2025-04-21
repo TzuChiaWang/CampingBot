@@ -503,6 +503,310 @@ def create_go_button():
         }
     }
 
+def safe_get_text(value, field_name=""):
+    """安全地獲取文字內容，處理不同的資料類型"""
+    if value is None:
+        return "未知"
+    if isinstance(value, str):
+        return value.replace('有訊號', '').strip() if field_name == "signal_strength" else value
+    if isinstance(value, (list, tuple)):
+        return ", ".join(map(str, value))
+    return str(value)
+
+def create_camp_bubble(camp):
+    """建立營區資訊 bubble"""
+    bubble = {
+        "type": "bubble",
+        "hero": {
+            "type": "image",
+            "url": camp["image_urls"][0] if isinstance(camp.get("image_urls"), list) and camp["image_urls"] else "https://example.com/default.jpg",
+            "size": "full",
+            "aspectRatio": "20:13",
+            "aspectMode": "cover"
+        },
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "spacing": "xl",
+            "paddingAll": "xl",
+            "justifyContent": "center",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": safe_get_text(camp.get("name")),
+                    "weight": "bold",
+                    "size": "xxl",
+                    "wrap": True,
+                    "color": "#905c44"
+                },
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "margin": "xl",
+                    "spacing": "lg",
+                    "contents": [
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "md",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "📍",
+                                    "size": "md",
+                                    "color": "#000000",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": f"地點：{safe_get_text(camp.get('location'))}",
+                                    "wrap": True,
+                                    "color": "#666666",
+                                    "size": "md",
+                                    "weight": "bold",
+                                    "flex": 5,
+                                },
+                            ],
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "md",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "⛰️",
+                                    "size": "md",
+                                    "color": "#000000",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": f"海拔：{safe_get_text(camp.get('altitude'))}",
+                                    "wrap": True,
+                                    "color": "#666666",
+                                    "size": "md",
+                                    "weight": "regular",
+                                    "flex": 5,
+                                },
+                            ],
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "md",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "✨",
+                                    "size": "md",
+                                    "color": "#000000",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": f"特色：{safe_get_text(camp.get('features'))}",
+                                    "wrap": True,
+                                    "color": "#666666",
+                                    "size": "md",
+                                    "weight": "regular",
+                                    "flex": 5,
+                                },
+                            ],
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "md",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "🏕️",
+                                    "size": "md",
+                                    "color": "#000000",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": f"設施：{safe_get_text(camp.get('facilities'))}",
+                                    "wrap": True,
+                                    "color": "#666666",
+                                    "size": "md",
+                                    "weight": "regular",
+                                    "flex": 5,
+                                },
+                            ],
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "md",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "📱",
+                                    "size": "md",
+                                    "color": "#000000",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": f"通訊：{safe_get_text(camp.get('signal_strength'), 'signal_strength')}",
+                                    "wrap": True,
+                                    "color": "#666666",
+                                    "size": "md",
+                                    "weight": "regular",
+                                    "flex": 5,
+                                },
+                            ],
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "md",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "🐕",
+                                    "size": "md",
+                                    "color": "#000000",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": f"寵物：{safe_get_text(camp.get('pets'))}",
+                                    "wrap": True,
+                                    "color": "#666666",
+                                    "size": "md",
+                                    "weight": "regular",
+                                    "flex": 5,
+                                },
+                            ],
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "md",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "🅿️",
+                                    "size": "md",
+                                    "color": "#000000",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": f"停車：{safe_get_text(camp.get('parking'))}",
+                                    "wrap": True,
+                                    "color": "#666666",
+                                    "size": "md",
+                                    "weight": "regular",
+                                    "flex": 5,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        "footer": {
+            "type": "box",
+            "layout": "vertical",
+            "spacing": "sm",
+            "paddingAll": "xl",
+            "contents": [
+                {
+                    "type": "button",
+                    "style": "primary",
+                    "height": "sm",
+                    "color": "#905c44",
+                    "margin": "lg",
+                    "action": {
+                        "type": "uri",
+                        "label": "立即預訂",
+                        "uri": camp.get("booking_url", "https://www.easycamp.com.tw"),
+                    },
+                },
+                {
+                    "type": "button",
+                    "style": "secondary",
+                    "height": "sm",
+                    "margin": "lg",
+                    "action": {
+                        "type": "uri",
+                        "label": "在 Google Map 中查看",
+                        "uri": f"https://www.google.com/maps/search/?api=1&query={requests.utils.quote(safe_get_text(camp.get('name')))}",
+                    },
+                }
+            ],
+        },
+    }
+
+    # 如果有社群連結，才加入查看更多照片按鈕
+    if camp.get("social_url"):
+        bubble["footer"]["contents"].append({
+            "type": "button",
+            "style": "secondary",
+            "height": "sm",
+            "margin": "lg",
+            "action": {
+                "type": "uri",
+                "label": "查看更多照片",
+                "uri": camp["social_url"],
+            },
+        })
+
+    return bubble
+
+def create_next_page_bubble(current_page, total_pages, keyword):
+    """建立下一頁按鈕 bubble"""
+    next_page_bubble = {
+        "type": "bubble",
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "position": "relative",
+            "offsetTop": "40%",
+            "width": "100%",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": "更多營區",
+                    "size": "xl",
+                    "weight": "bold",
+                    "align": "center",
+                    "color": "#905c44"
+                },
+                {
+                    "type": "text",
+                    "text": f"第 {current_page} 頁，共 {total_pages} 頁",
+                    "size": "md",
+                    "align": "center",
+                    "color": "#666666",
+                    "margin": "lg"
+                }
+            ]
+        },
+        "footer": {
+            "type": "box",
+            "layout": "vertical",
+            "spacing": "sm",
+            "paddingAll": "xl",
+            "contents": [
+                {
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#905c44",
+                    "action": {
+                        "type": "postback",
+                        "label": "下一頁",
+                        "data": json.dumps({
+                            "action": "next_page",
+                            "page": current_page + 1,
+                            "keyword": keyword
+                        }),
+                        "displayText": "查看更多營區"
+                    }
+                }
+            ]
+        }
+    }
+    return next_page_bubble
+
 def handle_message(event, Campsite):
     """處理收到的訊息"""
     message_text = event["message"]["text"].strip()
@@ -550,10 +854,39 @@ def handle_postback(event, Campsite):
         user_id = event["source"]["userId"]
         
         if data.get("action") == "next_page":
-            current_page = data.get("page", 1)
-            keyword = data.get("keyword", "")
-            campsites = Campsite.search_by_keywords(keyword)
-            return handle_search_results(event["replyToken"], campsites, current_page, keyword)
+            try:
+                current_page = data.get("page", 1)
+                keyword = data.get("keyword", "")
+                logger.info(f"處理下一頁請求: 頁碼={current_page}, 關鍵字={keyword}")  # 添加日誌
+                
+                # 如果關鍵字是空的，返回錯誤訊息
+                if not keyword:
+                    send_line_message(
+                        event["replyToken"],
+                        [{"type": "text", "text": "抱歉，無法找到搜尋條件。請重新開始搜尋。"}]
+                    )
+                    return
+                
+                # 執行搜尋
+                campsites = Campsite.search_by_keywords(keyword)
+                
+                # 檢查搜尋結果
+                if not campsites:
+                    send_line_message(
+                        event["replyToken"],
+                        [{"type": "text", "text": "抱歉，找不到符合條件的營區。請重新搜尋。"}]
+                    )
+                    return
+                
+                # 處理搜尋結果
+                return handle_search_results(event["replyToken"], campsites, current_page, keyword)
+            except Exception as e:
+                logger.error(f"處理下一頁時發生錯誤: {str(e)}")
+                send_line_message(
+                    event["replyToken"],
+                    [{"type": "text", "text": "抱歉，顯示更多營區時發生錯誤。請重新搜尋。"}]
+                )
+                return
             
         # 處理地區選擇
         elif data.get("action") == "select_region":
@@ -686,320 +1019,72 @@ def handle_postback(event, Campsite):
 
 def handle_search_results(reply_token, campsites, current_page, keyword):
     """處理搜尋結果的顯示邏輯"""
-    # 計算分頁資訊
-    total_pages = (len(campsites) + 9) // 10
-    start_idx = (current_page - 1) * 10
-    end_idx = min(start_idx + 10, len(campsites))
-    current_campsites = campsites[start_idx:end_idx]
-
-    # 建立 Flex Message
-    bubbles = []
-    for camp in current_campsites:
-        if not camp.get("image_urls"):
-            continue
-
-        # 建立營區資訊 bubble
-        bubble = {
-            "type": "bubble",
-            "hero": {
-                "type": "image",
-                "url": camp["image_urls"][0],
-                "size": "full",
-                "aspectRatio": "20:13",
-                "aspectMode": "cover"
-            },
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "spacing": "xl",
-                "paddingAll": "xl",
-                "justifyContent": "center",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": camp["name"],
-                        "weight": "bold",
-                        "size": "xxl",
-                        "wrap": True,
-                        "color": "#905c44"
-                    },
-                    {
-                        "type": "box",
-                        "layout": "vertical",
-                        "margin": "xl",
-                        "spacing": "lg",
-                        "contents": [
-                            {
-                                "type": "box",
-                                "layout": "baseline",
-                                "spacing": "md",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": "📍",
-                                        "size": "md",
-                                        "color": "#000000",
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": camp.get("location", "未知"),
-                                        "wrap": True,
-                                        "color": "#666666",
-                                        "size": "md",
-                                        "weight": "bold",
-                                        "flex": 5,
-                                    },
-                                ],
-                            },
-                            {
-                                "type": "box",
-                                "layout": "baseline",
-                                "spacing": "md",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": "⛰️",
-                                        "size": "md",
-                                        "color": "#000000",
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": f"海拔：{camp.get('altitude', '未知')}",
-                                        "wrap": True,
-                                        "color": "#666666",
-                                        "size": "md",
-                                        "weight": "regular",
-                                        "flex": 5,
-                                    },
-                                ],
-                            },
-                            {
-                                "type": "box",
-                                "layout": "baseline",
-                                "spacing": "md",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": "✨",
-                                        "size": "md",
-                                        "color": "#000000",
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": f"特色：{camp.get('features', '未知')}",
-                                        "wrap": True,
-                                        "color": "#666666",
-                                        "size": "md",
-                                        "weight": "regular",
-                                        "flex": 5,
-                                    },
-                                ],
-                            },
-                            {
-                                "type": "box",
-                                "layout": "baseline",
-                                "spacing": "md",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": "🏕️",
-                                        "size": "md",
-                                        "color": "#000000",
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": f"設施：{camp.get('facilities', '未知')}",
-                                        "wrap": True,
-                                        "color": "#666666",
-                                        "size": "md",
-                                        "weight": "regular",
-                                        "flex": 5,
-                                    },
-                                ],
-                            },
-                            {
-                                "type": "box",
-                                "layout": "baseline",
-                                "spacing": "md",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": "📱",
-                                        "size": "md",
-                                        "color": "#000000",
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": f"通訊：{camp.get('signal_strength', '未知').replace('有訊號', '').strip()}",
-                                        "wrap": True,
-                                        "color": "#666666",
-                                        "size": "md",
-                                        "weight": "regular",
-                                        "flex": 5,
-                                    },
-                                ],
-                            },
-                            {
-                                "type": "box",
-                                "layout": "baseline",
-                                "spacing": "md",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": "🐕",
-                                        "size": "md",
-                                        "color": "#000000",
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": f"寵物：{camp.get('pets', '未知')}",
-                                        "wrap": True,
-                                        "color": "#666666",
-                                        "size": "md",
-                                        "weight": "regular",
-                                        "flex": 5,
-                                    },
-                                ],
-                            },
-                            {
-                                "type": "box",
-                                "layout": "baseline",
-                                "spacing": "md",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": "🅿️",
-                                        "size": "md",
-                                        "color": "#000000",
-                                    },
-                                    {
-                                        "type": "text",
-                                        "text": f"停車：{camp.get('parking', '未知')}",
-                                        "wrap": True,
-                                        "color": "#666666",
-                                        "size": "md",
-                                        "weight": "regular",
-                                        "flex": 5,
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                ],
-            },
-            "footer": {
-                "type": "box",
-                "layout": "vertical",
-                "spacing": "sm",
-                "paddingAll": "xl",
-                "contents": [
-                    {
-                        "type": "button",
-                        "style": "primary",
-                        "height": "sm",
-                        "color": "#905c44",
-                        "margin": "lg",
-                        "action": {
-                            "type": "uri",
-                            "label": "立即預訂",
-                            "uri": camp.get("booking_url", "https://www.easycamp.com.tw"),
-                        },
-                    },
-                    {
-                        "type": "button",
-                        "style": "secondary",
-                        "height": "sm",
-                        "margin": "lg",
-                        "action": {
-                            "type": "uri",
-                            "label": "在 Google Map 中查看",
-                            "uri": f"https://www.google.com/maps/search/?api=1&query={requests.utils.quote(camp['name'])}",
-                        },
-                    }
-                ],
-            },
+    try:
+        # 計算分頁資訊
+        total_pages = (len(campsites) + 9) // 10
+        
+        # 檢查頁碼是否有效
+        if current_page < 1 or current_page > total_pages:
+            send_line_message(
+                reply_token,
+                [{"type": "text", "text": "抱歉，請求的頁碼無效。請重新搜尋。"}]
+            )
+            return
+            
+        start_idx = (current_page - 1) * 10
+        end_idx = min(start_idx + 10, len(campsites))
+        current_campsites = campsites[start_idx:end_idx]
+        
+        # 檢查是否有有效的營區資料
+        if not current_campsites:
+            send_line_message(
+                reply_token,
+                [{"type": "text", "text": "抱歉，此頁沒有可顯示的營區資訊。"}]
+            )
+            return
+            
+        # 建立 Flex Message
+        bubbles = []
+        
+        # 處理每個營區資訊
+        for camp in current_campsites:
+            if not camp.get("image_urls"):
+                continue
+                
+            # 建立營區資訊 bubble
+            bubble = create_camp_bubble(camp)
+            bubbles.append(bubble)
+            
+        # 如果沒有有效的營區資訊
+        if not bubbles:
+            send_line_message(
+                reply_token,
+                [{"type": "text", "text": "抱歉，無法顯示營區資訊。請重新搜尋。"}]
+            )
+            return
+            
+        # 如果還有下一頁，加入分頁按鈕
+        if current_page < total_pages:
+            next_page_bubble = create_next_page_bubble(current_page, total_pages, keyword)
+            bubbles.append(next_page_bubble)
+            
+        # 創建並發送 Flex Message
+        carousel = {
+            "type": "carousel",
+            "contents": bubbles
         }
-
-        # 如果有社群連結，才加入查看更多照片按鈕
-        if camp.get("social_url"):
-            bubble["footer"]["contents"].append({
-                "type": "button",
-                "style": "secondary",
-                "height": "sm",
-                "margin": "lg",
-                "action": {
-                    "type": "uri",
-                    "label": "查看更多照片",
-                    "uri": camp["social_url"],
-                },
-            })
-
-        bubbles.append(bubble)
-
-    # 如果還有下一頁，加入分頁按鈕
-    if current_page < total_pages:
-        next_page_bubble = {
-            "type": "bubble",
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "position": "relative",
-                "offsetTop": "40%",
-                "width": "100%",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": "更多營區",
-                        "size": "xl",
-                        "weight": "bold",
-                        "align": "center",
-                        "color": "#905c44"
-                    },
-                    {
-                        "type": "text",
-                        "text": f"第 {current_page} 頁，共 {total_pages} 頁",
-                        "size": "md",
-                        "align": "center",
-                        "color": "#666666",
-                        "margin": "lg"
-                    }
-                ]
-            },
-            "footer": {
-                "type": "box",
-                "layout": "vertical",
-                "spacing": "sm",
-                "paddingAll": "xl",
-                "contents": [
-                    {
-                        "type": "button",
-                        "style": "primary",
-                        "color": "#905c44",
-                        "action": {
-                            "type": "postback",
-                            "label": "下一頁",
-                            "data": json.dumps({
-                                "action": "next_page",
-                                "page": current_page + 1,
-                                "keyword": keyword
-                            }),
-                            "displayText": "查看更多營區"
-                        }
-                    }
-                ]
-            }
+        
+        flex_message = {
+            "type": "flex",
+            "altText": "營區搜尋結果",
+            "contents": carousel
         }
-        bubbles.append(next_page_bubble)
-
-    carousel = {
-        "type": "carousel",
-        "contents": bubbles
-    }
-
-    flex_message = {
-        "type": "flex",
-        "altText": "營區搜尋結果",
-        "contents": carousel
-    }
-
-    send_line_message(reply_token, [flex_message])
+        
+        send_line_message(reply_token, [flex_message])
+        
+    except Exception as e:
+        logger.error(f"處理搜尋結果時發生錯誤: {str(e)}")
+        send_line_message(
+            reply_token,
+            [{"type": "text", "text": "抱歉，顯示搜尋結果時發生錯誤。請重新搜尋。"}]
+        )

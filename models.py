@@ -161,17 +161,39 @@ class Campsite:
                 continue
             # 處理海拔相關的關鍵字
             elif keyword in ["海拔高", "高海拔"]:
-                altitude_filter = {"altitude": {"$regex": r"\d+", "$exists": True}}
+                altitude_filter = {
+                    "$or": [
+                        {"altitude": {"$gt": 1000}},  # 超過1000公尺視為高海拔
+                        {"name": {"$regex": ".*高海拔.*", "$options": "i"}},
+                        {"description": {"$regex": ".*高海拔.*", "$options": "i"}}
+                    ]
+                }
                 continue
             elif keyword in ["海拔低", "低海拔"]:
-                altitude_filter = {"altitude": {"$regex": r"\d+", "$exists": True}}
+                altitude_filter = {
+                    "$or": [
+                        {"altitude": {"$lt": 1000}},  # 低於1000公尺視為低海拔
+                        {"name": {"$regex": ".*低海拔.*", "$options": "i"}},
+                        {"description": {"$regex": ".*低海拔.*", "$options": "i"}}
+                    ]
+                }
                 continue
             # 處理寵物相關的關鍵字
             elif keyword in ["可帶寵物", "寵物可", "可攜帶寵物", "可寵物"]:
-                pet_filter = {"pets": "自搭帳可帶寵物"}
+                pet_filter = {
+                    "$or": [
+                        {"pets": "自搭帳可帶寵物"},
+                        {"description": {"$regex": ".*可帶寵物.*", "$options": "i"}}
+                    ]
+                }
                 continue
             elif keyword in ["不可帶寵物", "寵物不可", "不可攜帶寵物", "不可寵物"]:
-                pet_filter = {"pets": "全區不可帶寵物"}
+                pet_filter = {
+                    "$or": [
+                        {"pets": "全區不可帶寵物"},
+                        {"description": {"$regex": ".*不可帶寵物.*", "$options": "i"}}
+                    ]
+                }
                 continue
             # 處理通訊相關的關鍵字
             signal_match = False
@@ -192,7 +214,13 @@ class Campsite:
             parking_match = False
             for parking_type, keywords in parking_keywords.items():
                 if keyword in keywords:
-                    parking_filter = {"parking": parking_type}
+                    parking_filter = {
+                        "$or": [
+                            {"parking": parking_type},
+                            {"parking": {"$regex": f".*{keyword}.*", "$options": "i"}},
+                            {"description": {"$regex": f".*{keyword}.*", "$options": "i"}}
+                        ]
+                    }
                     parking_match = True
                     break
             if parking_match:
