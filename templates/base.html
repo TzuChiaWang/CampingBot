@@ -178,7 +178,12 @@
             </li>
             {% endif %}
           </ul>
-          <div class="line-id">
+          <div
+            class="line-id"
+            style="cursor: pointer"
+            data-bs-toggle="modal"
+            data-bs-target="#qrModal"
+          >
             <img
               src="{{ url_for('static', filename='Line-Icon.png') }}"
               alt="LINE"
@@ -188,6 +193,37 @@
         </div>
       </div>
     </nav>
+
+    <!-- QR Code Modal -->
+    <div
+      class="modal fade"
+      id="qrModal"
+      tabindex="-1"
+      aria-labelledby="qrModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="qrModalLabel">掃描 QR Code 加入好友</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body text-center p-4">
+            <img
+              src="{{ url_for('static', filename='QRcode.png') }}"
+              alt="LINE QR Code"
+              class="img-fluid"
+              style="max-width: 100%"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Flash 訊息 -->
     <div class="flash-messages">
