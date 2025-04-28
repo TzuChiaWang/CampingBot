@@ -263,6 +263,11 @@ def not_found_error(error):
 def internal_error(error):
     return render_template("500.html"), 500
 
+@app.route("/googleb32b2f4a69179991.html")
+def google_search_console():
+    return render_template("googleb32b2f4a69179991.html")
+
+
 
 if __name__ == "__main__":
     # 使用與 gunicorn 相同的端口
