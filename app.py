@@ -23,7 +23,13 @@ import secrets
 import os
 from scraper import save_campsite
 from datetime import datetime
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_login import (
+    LoginManager,
+    login_user,
+    logout_user,
+    login_required,
+    current_user,
+)
 
 # 載入環境變數
 load_dotenv()
@@ -34,17 +40,24 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = secrets.token_hex(32)  # 每次啟動時生成新的 64 字符密鑰
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key')
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "your-secret-key")
 
 # 初始化 Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'
-login_manager.login_message = '請先登入'
+login_manager.login_view = "login"
+login_manager.login_message = "請先登入"
+
 
 @login_manager.user_loader
 def load_user(username):
     return User.get(username)
+
+
+@app.route("/")
+def redirect_home():
+    return redirect("https://camping.ddnsking.com", code=301)
+
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -94,11 +107,7 @@ def index():
     campsites = campsites_all[start:end]
 
     return render_template(
-        "index.html",
-        campsites=campsites,
-        page=page,
-        total_pages=total_pages,
-        q=q
+        "index.html", campsites=campsites, page=page, total_pages=total_pages, q=q
     )
 
 
@@ -108,8 +117,12 @@ def add_campsite():
     form = CampsiteForm()
     if form.validate_on_submit():
         # 將圖片 URL 字串分割為列表
-        image_urls = [url.strip() for url in form.image_url.data.split(',') if url.strip()] if form.image_url.data else []
-        
+        image_urls = (
+            [url.strip() for url in form.image_url.data.split(",") if url.strip()]
+            if form.image_url.data
+            else []
+        )
+
         campsite_data = {
             "name": form.name.data,
             "location": form.location.data,
@@ -154,7 +167,9 @@ def edit_campsite(id):
             elif field == "signal_strength" and "signal_strength" in campsite:
                 # 如果是字串，先轉換為列表
                 if isinstance(campsite["signal_strength"], str):
-                    form._fields[field].data = [s.strip() for s in campsite["signal_strength"].split(',')]
+                    form._fields[field].data = [
+                        s.strip() for s in campsite["signal_strength"].split(",")
+                    ]
                 else:
                     form._fields[field].data = campsite["signal_strength"]
             elif field in campsite:
@@ -173,7 +188,11 @@ def edit_campsite(id):
             "sideservice": form.sideservice.data,
             "open_time": form.open_time.data,
             "parking": form.parking.data,
-            "image_urls": [url.strip() for url in form.image_url.data.split(',') if url.strip()] if form.image_url.data else [],
+            "image_urls": (
+                [url.strip() for url in form.image_url.data.split(",") if url.strip()]
+                if form.image_url.data
+                else []
+            ),
             "booking_url": form.booking_url.data,
             "social_url": form.social_url.data,
         }
@@ -231,27 +250,28 @@ def health_check():
     return {"status": "healthy"}, 200
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    
+        return redirect(url_for("index"))
+
     form = LoginForm()
     if form.validate_on_submit():
         user = User.get(form.username.data)
         if user and user.check_password(form.password.data):
             login_user(user)
-            flash('登入成功！', 'success')
-            return redirect(url_for('index'))
-        flash('使用者名稱或密碼錯誤', 'danger')
-    return render_template('login.html', form=form)
+            flash("登入成功！", "success")
+            return redirect(url_for("index"))
+        flash("使用者名稱或密碼錯誤", "danger")
+    return render_template("login.html", form=form)
 
-@app.route('/logout')
+
+@app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    flash('您已登出', 'info')
-    return redirect(url_for('index'))
+    flash("您已登出", "info")
+    return redirect(url_for("index"))
 
 
 @app.errorhandler(404)
@@ -263,13 +283,13 @@ def not_found_error(error):
 def internal_error(error):
     return render_template("500.html"), 500
 
+
 @app.route("/googleb32b2f4a69179991.html")
 def google_search_console():
     return render_template("googleb32b2f4a69179991.html")
 
 
-
 if __name__ == "__main__":
     # 使用與 gunicorn 相同的端口
-    port = int(os.getenv('PORT', 13215))
+    port = int(os.getenv("PORT", 13215))
     app.run(host="0.0.0.0", port=port, debug=False)
