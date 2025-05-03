@@ -54,6 +54,11 @@ def load_user(username):
     return User.get(username)
 
 
+@app.route("/")
+def redirect_home():
+    return redirect("https://camping.ddnsking.com", code=301)
+
+
 @app.route("/callback", methods=["POST"])
 def callback():
     """處理來自 LINE 的 webhook 請求"""
@@ -83,13 +88,8 @@ def callback():
         abort(500)
 
 
-@app.route("/")
+"""@app.route("/")
 def index():
-
-    user_agent = request.headers.get("User-Agent", "").lower()
-    if "googlebot" in user_agent:
-        return redirect("https://camping.ddnsking.com", code=301)
-
     page = int(request.args.get("page", 1))
     per_page = 12
     q = request.args.get("q", "")
@@ -109,6 +109,7 @@ def index():
     return render_template(
         "index.html", campsites=campsites, page=page, total_pages=total_pages, q=q
     )
+"""
 
 
 @app.route("/add", methods=["GET", "POST"])
