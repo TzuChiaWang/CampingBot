@@ -30,6 +30,7 @@ from flask_login import (
     login_required,
     current_user,
 )
+from sitemap import sitemap_bp  # 導入 sitemap 藍圖
 
 # 載入環境變數
 load_dotenv()
@@ -52,6 +53,21 @@ login_manager.login_message = "請先登入"
 @login_manager.user_loader
 def load_user(username):
     return User.get(username)
+
+
+app.register_blueprint(sitemap_bp)
+
+
+@app.route("/robots.txt")
+def robots():
+    robots_txt = """
+    User-agent: *
+    Disallow: /admin/
+    Disallow: /private/
+    Allow: /public/
+    Sitemap: https://camping.ddnsking.com/sitemap.xml
+    """
+    return Response(robots_txt, mimetype="text/plain")
 
 
 @app.route("/callback", methods=["POST"])
