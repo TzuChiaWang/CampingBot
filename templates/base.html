@@ -9,7 +9,7 @@
     <meta name="googlebot" content="index, follow" />
     <meta name="bingbot" content="index, follow" />
 
-    <meta property="og:title" content="回憶露 - 露營地資訊整合平台" />
+    <meta property="og:title" content="回憶露  - 露營資訊整合平台" />
     <meta property="og:description" content="提供全台露營地資訊與規劃工具，幫你找到最適合的露營地。" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://camping.ddnsking.com/" />
@@ -76,10 +76,28 @@
         transform-origin: left center;
       }
       @media (max-width: 768px) {
-        .navbar-brand img {
-          height: 50px;
-          margin-right: 0.5rem;
+        .navbar {
+          padding: 0.5rem 0.6rem;
+          min-height: 80px;
         }
+        
+        .navbar-brand img {
+          height: 70px;
+          width: auto;
+          flex-shrink: 0;
+        }
+        
+        .navbar-brand {
+          display: flex;
+          align-items: center;
+          max-width: calc(100% - 50px);
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          line-height: 1.3;
+          font-weight: 700;
+        }
+        
         .line-id {
           margin: 0.5rem 0;
           justify-content: center;
@@ -88,10 +106,36 @@
           background-color: var(--primary-color);
           padding: 1rem;
           border-radius: 0 0 0.5rem 0.5rem;
+          margin-top: 0.5rem;
         }
         .nav-item {
           text-align: center;
           padding: 0.5rem 0;
+        }
+        
+        .navbar-toggler {
+          margin-left: 5px;
+          padding: 0.35rem 0.5rem;
+        }
+        
+        .navbar-toggler-icon {
+          width: 1.6em;
+          height: 1.6em;
+        }
+      }
+      @media (max-width: 576px) {
+        .navbar-brand img {
+          height: 70px;
+        }
+        .mobile-title {
+          font-size: 1.05rem;
+        }
+        .navbar-toggler {
+          padding: 0.3rem 0.4rem;
+        }
+        .navbar-toggler-icon {
+          width: 1.4em;
+          height: 1.4em;
         }
       }
       .nav-link {
@@ -146,30 +190,73 @@
         right: 20px;
         z-index: 1000;
       }
+      
+      /* 桌面版導航欄樣式 */
+      @media (min-width: 768px) {
+        .navbar-collapse {
+          display: flex !important;
+        }
+        
+        .navbar-toggler {
+          display: none !important;
+        }
+      }
+      
+      /* 手機版導航欄樣式 */
+      .mobile-brand-container {
+        max-width: 80%;
+        overflow: hidden;
+      }
+      
+      .mobile-title {
+        color: white;
+        font-weight: 700;
+        font-size: 1.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-left: 0.5rem;
+      }
     </style>
     {% block head %}{% endblock %}
   </head>
   <body>
     <!-- 導航欄 -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
       <div class="container">
-        <a class="navbar-brand" href="{{ url_for('index') }}">
+        <!-- 桌面版導航欄 -->
+        <a class="navbar-brand d-none d-md-flex" href="{{ url_for('index') }}">
           <img
             src="{{ url_for('static', filename='logo.png') }}"
             alt="回憶露"
             height="100"
             class="d-inline-block align-text-top me-2"
           />
-          回憶露 - 露營地資訊整合平台
+          回憶露 - 露營資訊整合平台
         </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
+
+        <!-- 手機版導航欄 -->
+        <div class="d-md-none d-flex align-items-center justify-content-between w-100">
+          <div class="d-flex align-items-center mobile-brand-container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+              <img
+                src="{{ url_for('static', filename='logo.png') }}"
+                alt="回憶露"
+                class="d-inline-block align-text-top"
+              />
+            </a>
+            <span class="mobile-title">回憶露</span>
+          </div>
+          <button
+            class="navbar-toggler d-md-none"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
+
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
@@ -191,8 +278,9 @@
             </li>
             {% endif %}
           </ul>
+          <!-- 桌面版LINE ID，點擊顯示QR碼 -->
           <div
-            class="line-id"
+            class="line-id d-none d-md-flex"
             style="cursor: pointer"
             data-bs-toggle="modal"
             data-bs-target="#qrModal"
@@ -203,6 +291,20 @@
             />
             <span>ID: @189dsoqf</span>
           </div>
+          <!-- 手機版LINE ID，點擊直接跳轉 -->
+          <a
+            href="https://line.me/R/ti/p/%40189dsoqf#~"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="line-id d-md-none"
+            style="text-decoration: none;"
+          >
+            <img
+              src="{{ url_for('static', filename='Line-Icon.png') }}"
+              alt="LINE"
+            />
+            <span>ID: @189dsoqf</span>
+          </a>
         </div>
       </div>
     </nav>
