@@ -6,7 +6,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: box-shadow 0.2s;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     border-radius: 0.5rem;
     overflow: hidden;
@@ -16,16 +16,16 @@
   }
   .card-img-top {
     height: 200px;
+    width: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease-out;
-    transform-origin: center center;
+    position: relative;
+    display: block;
   }
-  .card-img-top:hover {
-    transform: scale(1.02);
-  }
-  .campsite-card .card-img-wrapper {
+  .card-img-wrapper {
     overflow: hidden;
     position: relative;
+    isolation: isolate;
+    background-color: #f0f0f0;
   }
   .card-body {
     flex: 1;
@@ -75,8 +75,27 @@
     background-color: #fff;
     padding: 1.5rem;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
     margin-bottom: 2rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .search-box .input-group {
+    flex: 1;
+    transition: all 0.3s ease;
+  }
+  .search-box .input-group:focus-within {
+    box-shadow: 0 0 0 0.2rem rgba(139, 90, 43, 0.15);
+    border-radius: 0.375rem;
+  }
+  .search-box .form-control {
+    border-color: #ced4da;
+    height: 42px;
+  }
+  .search-box .input-group-text {
+    border-color: #ced4da;
+  }
+  .search-box .btn-primary {
+    height: 42px;
   }
   .feature-badge {
     font-size: 0.8rem;
@@ -107,7 +126,7 @@
   /* 手機版優化 */
   @media (max-width: 768px) {
     .search-box {
-      padding: 1rem;
+      padding: 1.25rem;
       margin-left: -0.5rem;
       margin-right: -0.5rem;
       border-radius: 0.5rem;
@@ -175,10 +194,26 @@
   }
   
   /* 極小螢幕優化 */
-  @media (max-width: 576px) {
+  @media (max-width: 575.98px) {
     .search-box {
-      padding: 0.75rem;
+      padding: 1rem;
     }
+    
+    .search-box form {
+      flex-direction: column;
+    }
+    
+    .search-box .btn-primary {
+      margin-top: 0.5rem;
+      width: 100%;
+      height: 38px;
+    }
+    
+    .search-box .form-control,
+    .search-box .input-group-text {
+      height: 38px;
+    }
+    
     .card-img-top {
       height: 140px;
     }
@@ -194,39 +229,121 @@
       font-size: 0.85rem;
     }
   }
+
+  /* 支援iPad等中等裝置 */
+  @media (min-width: 576px) and (max-width: 991px) {
+    .search-box .form-control {
+      min-width: 200px;
+    }
+    
+    .search-box form {
+      width: 100%;
+    }
+    
+    .search-box .input-group {
+      min-width: 60%;
+    }
+  }
+
+  /* 模態框樣式優化 */
+  .modal {
+    z-index: 1060;
+  }
+  
+  .modal-backdrop {
+    z-index: 1050;
+  }
+
+  /* 照片預覽提示 */
+  .preview-hint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s linear;
+    z-index: 10;
+    pointer-events: none;
+  }
+  
+  .preview-hint i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* 移除所有CSS懸停效果，完全依賴JavaScript控制 */
+  .preview-hint.show {
+    opacity: 1;
+  }
+
+  /* 在 <style> 部分添加模態框打開時的樣式 */
+  .modal-open .campsite-card {
+    transition: none !important;
+    transform: none !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .modal-open .campsite-card:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+    transform: none !important;
+  }
+
+  .modal-open .card-img-top,
+  .modal-open .card-img-wrapper,
+  .modal-open .card-img-container {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .modal-open .preview-hint {
+    display: none !important;
+  }
 </style>
 {% endblock %} 
 
 {% block content %}
 <div class="container">
-  <div class="search-box">
-    <div class="row g-3">
-      <div class="col-12 col-md-6">
-        <form method="GET" action="{{ url_for('index') }}" class="d-flex gap-2">
-          <input
-            type="text"
-            name="q"
-            class="form-control"
-            placeholder="搜尋營區名稱、位置或特色"
-            value="{{ request.args.get('q', '') }}"
-          />
+  <div class="search-box shadow-sm">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-8">
+        <form method="GET" action="{{ url_for('index') }}" class="d-flex flex-column flex-sm-row gap-2">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input
+              type="text"
+              name="q"
+              class="form-control border-start-0"
+              placeholder="搜尋營區名稱、位置或特色"
+              value="{{ request.args.get('q', '') }}"
+              aria-label="搜尋營區"
+            />
+          </div>
           <button
             type="submit"
             class="btn btn-primary d-flex align-items-center justify-content-center"
             style="min-width: 100px"
           >
-            <i class="fas fa-search me-2"></i><span class="d-none d-sm-inline">搜尋</span>
+            <i class="fas fa-search me-2"></i><span>搜尋</span>
           </button>
         </form>
       </div>
-      <div class="col-12 col-md-6 text-center text-md-end">
+      <div class="col-12 col-md-4 text-center text-md-end">
         {% if current_user.is_authenticated %}
-        <div class="d-grid d-md-block gap-2">
+        <div class="d-grid d-md-flex gap-2 justify-content-md-end">
           <a href="{{ url_for('add_campsite') }}" class="btn btn-success">
-            <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">新增營區</span>
+            <i class="fas fa-plus me-1"></i><span>新增營區</span>
           </a>
           <a href="{{ url_for('update_data') }}" class="btn btn-secondary">
-            <i class="fas fa-sync me-1"></i><span class="d-none d-sm-inline">更新資料</span>
+            <i class="fas fa-sync me-1"></i><span>更新資料</span>
           </a>
         </div>
         {% endif %}
@@ -258,14 +375,20 @@
 
         {% if campsite.image_urls %}
         <div class="card-img-wrapper">
-          <img
-            src="{{ url_for('image_proxy') }}?url={{ campsite.image_urls[0] | urlencode }}"
-            class="card-img-top"
-            alt="{{ campsite.name }}"
-            data-campsite-id="{{ loop.index }}"
-            style="cursor: pointer"
-            onerror="this.onerror=null; this.src='/static/default.png';"
-          />
+          <div class="card-img-container">
+            <img
+              src="{{ url_for('image_proxy') }}?url={{ campsite.image_urls[0] | urlencode }}"
+              class="card-img-top"
+              alt="{{ campsite.name }}"
+              data-campsite-id="{{ loop.index }}"
+              style="cursor: pointer"
+              onerror="this.onerror=null; this.src='/static/default.png';"
+            />
+            <div class="preview-hint">
+              <i class="fas fa-search-plus"></i>
+              <span>查看照片</span>
+            </div>
+          </div>
         </div>
         {% else %}
         <img src="/static/default.png" class="card-img-top" alt="無圖片" />
@@ -481,46 +604,98 @@
 document.addEventListener('DOMContentLoaded', function() {
   let activeModal = null;
   let activeCarousel = null;
+  let currentHoverTimer = null;
+  let isModalOpen = false;
 
-  // 處理圖片點擊
-  document.querySelectorAll('.card-img-top').forEach(function(img) {
-    img.addEventListener('click', function() {
-      const campsiteId = this.getAttribute('data-campsite-id');
+  // 處理圖片容器的滑鼠事件
+  document.querySelectorAll('.card-img-container').forEach(function(container) {
+    const previewHint = container.querySelector('.preview-hint');
+    
+    // 使用mouseenter/mouseleave代替hover效果
+    container.addEventListener('mouseenter', function() {
+      // 如果模態框已開啟，不顯示預覽提示
+      if (isModalOpen) return;
+      
+      // 清除任何現有的計時器
+      if (currentHoverTimer) {
+        clearTimeout(currentHoverTimer);
+      }
+      
+      // 延遲顯示提示，避免快速滑過時閃爍
+      currentHoverTimer = setTimeout(function() {
+        if (previewHint && !isModalOpen) {
+          previewHint.classList.add('show');
+        }
+      }, 50);
+    });
+    
+    container.addEventListener('mouseleave', function() {
+      // 清除任何現有的計時器
+      if (currentHoverTimer) {
+        clearTimeout(currentHoverTimer);
+        currentHoverTimer = null;
+      }
+      
+      // 隱藏提示
+      if (previewHint) {
+        previewHint.classList.remove('show');
+      }
+    });
+    
+    // 點擊事件處理器
+    container.addEventListener('click', function(event) {
+      // 阻止事件冒泡，避免觸發卡片的其他事件
+      event.stopPropagation();
+      event.preventDefault();
+      
+      // 如果模態框已開啟，不執行操作
+      if (isModalOpen) return;
+      
+      const img = container.querySelector('.card-img-top');
+      if (!img) return;
+      
+      const campsiteId = img.getAttribute('data-campsite-id');
       const modalId = `imageModal_${campsiteId}`;
       const modalEl = document.getElementById(modalId);
       
-      if (modalEl) {
-        // 如果有之前的活動輪播，清理它
-        if (activeCarousel) {
-          activeCarousel.dispose();
-          activeCarousel = null;
-        }
-
-        // 初始化新的 Modal
-        if (!activeModal) {
-          activeModal = new bootstrap.Modal(modalEl, {
-            backdrop: 'static',
-            keyboard: false
-          });
-        }
-
-        // 在顯示 Modal 之前初始化輪播
-        const carouselEl = modalEl.querySelector('.carousel');
-        if (carouselEl) {
-          activeCarousel = new bootstrap.Carousel(carouselEl, {
-            interval: false,
-            wrap: true,
-            touch: false
-          });
-        }
-
-        // 顯示 Modal
-        activeModal.show();
+      if (!modalEl) return;
+      
+      // 如果有之前的輪播，清理它
+      if (activeCarousel) {
+        activeCarousel.dispose();
+        activeCarousel = null;
       }
+
+      // 初始化新的Modal
+      if (activeModal) {
+        activeModal.dispose();
+      }
+      activeModal = new bootstrap.Modal(modalEl);
+
+      // 在顯示Modal前初始化輪播
+      const carouselEl = modalEl.querySelector('.carousel');
+      if (carouselEl) {
+        activeCarousel = new bootstrap.Carousel(carouselEl, {
+          interval: false,
+          wrap: true,
+          touch: false
+        });
+      }
+
+      // 標記模態框為打開狀態
+      isModalOpen = true;
+      
+      // 先隱藏所有預覽提示
+      document.querySelectorAll('.preview-hint.show').forEach(hint => {
+        hint.classList.remove('show');
+      });
+
+      // 顯示Modal
+      activeModal.show();
     });
   });
 
-  // 監聽所有 Modal 的關閉事件
+  // 監聽所有Modal的關閉事件
   document.querySelectorAll('.modal').forEach(function(modalEl) {
     modalEl.addEventListener('hidden.bs.modal', function() {
       // 清理輪播實例
@@ -528,17 +703,39 @@ document.addEventListener('DOMContentLoaded', function() {
         activeCarousel.dispose();
         activeCarousel = null;
       }
-      // 清理 Modal 實例
+      // 清理Modal實例
       if (activeModal) {
         activeModal.dispose();
         activeModal = null;
       }
+      
+      // 標記模態框為關閉狀態
+      isModalOpen = false;
+    });
+    
+    // 監聽模態框顯示事件，防止冒泡
+    modalEl.addEventListener('shown.bs.modal', function(e) {
+      e.stopPropagation();
+    });
+  });
+
+  // 確保模態框內的所有點擊事件不會傳播到卡片
+  document.querySelectorAll('.modal').forEach(function(modal) {
+    modal.addEventListener('click', function(e) {
+      e.stopPropagation();
     });
   });
 
   // 防止輪播控制按鈕的點擊事件傳播
   document.querySelectorAll('.carousel-control-prev, .carousel-control-next').forEach(function(control) {
     control.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  });
+  
+  // 防止模態框內容點擊事件傳播
+  document.querySelectorAll('.modal-content').forEach(function(content) {
+    content.addEventListener('click', function(e) {
       e.stopPropagation();
     });
   });

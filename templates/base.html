@@ -16,6 +16,13 @@
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#8B5A2B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Favicon -->
     <link
       rel="icon"
@@ -36,37 +43,53 @@
     />
     <style>
       :root {
-        --primary-color: #905c44;
-        --primary-dark: #744a37;
-        --primary-light: #a67a62;
-        --accent-color: #d4b08c;
+        --primary-color: #8B5A2B;
+        --primary-dark: #5E3B1C;
+        --primary-light: #A67C52;
+        --accent-color: #D4B483;
+        --text-light: #ffffff;
+        --text-dark: #33241A;
+        --bg-light: #f8f6f2;
+        --bg-dark: #f8f8f8;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+        --border-radius: 0.5rem;
+        --transition-speed: 0.3s;
       }
 
       body {
-        background-color: #f8f9fa;
+        background-color: var(--bg-light);
         min-height: 100vh;
         display: flex;
         flex-direction: column;
+        font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        color: var(--text-dark);
+        line-height: 1.6;
       }
       .navbar {
-        padding: 0.5rem 1rem;
+        padding: 0.7rem 1rem;
         min-height: 70px;
         display: flex;
         align-items: center;
         background-color: var(--primary-color) !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-speed) ease;
+        border-bottom: 2px solid var(--primary-dark);
       }
       .navbar-brand {
         font-size: clamp(1.5rem, 4vw, 2rem);
-        font-weight: bold;
+        font-weight: 700;
         display: flex;
         align-items: center;
         padding: 0;
         height: 100%;
-        color: #fff !important;
+        color: var(--text-light) !important;
+        transition: all var(--transition-speed) ease;
       }
       .navbar-brand:hover {
         color: var(--accent-color) !important;
+        transform: translateY(-2px);
       }
       .navbar-brand img {
         height: 70px;
@@ -74,6 +97,10 @@
         margin-right: 1rem;
         transform: scale(1.2);
         transform-origin: left center;
+        transition: transform var(--transition-speed) ease;
+      }
+      .navbar-brand:hover img {
+        transform: scale(1.25);
       }
       @media (max-width: 768px) {
         .navbar {
@@ -87,27 +114,25 @@
           flex-shrink: 0;
         }
         
-        .navbar-brand {
-          display: flex;
-          align-items: center;
-          max-width: calc(100% - 50px);
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          line-height: 1.3;
-          font-weight: 700;
-        }
-        
         .line-id {
           margin: 0.5rem 0;
           justify-content: center;
         }
+        
         .navbar-collapse {
           background-color: var(--primary-color);
           padding: 1rem;
-          border-radius: 0 0 0.5rem 0.5rem;
+          border-radius: 0 0 var(--border-radius) var(--border-radius);
           margin-top: 0.5rem;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          box-shadow: var(--shadow-md);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
+        
         .nav-item {
           text-align: center;
           padding: 0.5rem 0;
@@ -116,6 +141,19 @@
         .navbar-toggler {
           margin-left: 5px;
           padding: 0.35rem 0.5rem;
+          border: none;
+          color: var(--text-light);
+          background-color: rgba(255, 255, 255, 0.1);
+          border-radius: var(--border-radius);
+          transition: all var(--transition-speed) ease;
+        }
+        
+        .navbar-toggler:focus {
+          box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.15);
+        }
+        
+        .navbar-toggler:hover {
+          background-color: rgba(255, 255, 255, 0.2);
         }
         
         .navbar-toggler-icon {
@@ -140,17 +178,47 @@
       }
       .nav-link {
         font-size: 1.1rem;
-        color: rgba(255, 255, 255, 0.9) !important;
-        transition: color 0.3s ease;
+        color: var(--text-light) !important;
+        opacity: 0.9;
+        transition: all var(--transition-speed) ease;
+        position: relative;
+        padding: 0.5rem 1rem;
       }
       .nav-link:hover {
         color: var(--accent-color) !important;
+        opacity: 1;
+        transform: translateY(-2px);
       }
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background-color: var(--accent-color);
+        transition: all var(--transition-speed) ease;
+        transform: translateX(-50%);
+      }
+      .nav-link:hover::after {
+        width: 70%;
+        background-color: var(--accent-color);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+      
       .line-id {
         display: flex;
         align-items: center;
-        color: rgba(255, 255, 255, 0.9) !important;
+        color: var(--text-light) !important;
+        opacity: 0.9;
         margin-left: 1rem;
+        transition: all var(--transition-speed) ease;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius);
+      }
+      .line-id:hover {
+        opacity: 1;
+        background-color: rgba(255, 255, 255, 0.1);
       }
       .line-id img {
         height: 24px;
@@ -159,36 +227,93 @@
       }
       .footer {
         margin-top: auto;
-        padding: 1rem 0;
+        padding: 2rem 0;
         background-color: var(--primary-dark);
-        color: white;
-        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        color: var(--text-light);
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
       }
       .btn-primary {
         background-color: var(--primary-color) !important;
         border-color: var(--primary-color) !important;
-        transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        padding: 0.5rem 1.25rem;
+        font-weight: 600;
+        transition: all var(--transition-speed) ease;
+        box-shadow: var(--shadow-sm);
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
       }
       .btn-primary:hover {
         background-color: var(--primary-dark) !important;
         border-color: var(--primary-dark) !important;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+      .btn-primary:active {
+        transform: translateY(0);
       }
       .bg-primary {
         background-color: var(--primary-color) !important;
       }
       .card {
         border: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-speed) ease;
+        overflow: hidden;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-bottom: 3px solid var(--primary-light);
+      }
+      .card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-5px);
+        border-left: 3px solid var(--accent-color);
+      }
+      .card-header {
+        background-color: var(--primary-color);
+        color: var(--text-light);
+        font-weight: 600;
+        padding: 1rem 1.25rem;
+        border-bottom: 2px solid var(--primary-dark);
+      }
+      .card-body {
+        padding: 1.5rem;
       }
       .main-content {
         flex: 1;
-        padding: 2rem 0;
+        padding: 2.5rem 0;
       }
       .flash-messages {
         position: fixed;
-        top: 70px;
+        top: 85px;
         right: 20px;
         z-index: 1000;
+        max-width: 350px;
+      }
+      .alert {
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        border: none;
+        margin-bottom: 1rem;
+        opacity: 0.95;
+        animation: fadeInRight 0.5s;
+      }
+      
+      @keyframes fadeInRight {
+        from {
+          opacity: 0;
+          transform: translateX(50px);
+        }
+        to {
+          opacity: 0.95;
+          transform: translateX(0);
+        }
+      }
+      
+      .nav-item {
+        transition: all var(--transition-speed) ease;
+      }
+      .nav-item:hover {
+        transform: translateY(-2px);
       }
       
       /* 桌面版導航欄樣式 */
@@ -206,21 +331,112 @@
       .mobile-brand-container {
         max-width: 80%;
         overflow: hidden;
+        display: flex;
+        align-items: center;
       }
       
       .mobile-title {
-        color: white;
+        color: var(--text-light);
         font-weight: 700;
         font-size: 1.25rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         margin-left: 0.5rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .navbar-brand img {
+        height: 70px;
+        width: auto;
+        flex-shrink: 0;
+      }
+      
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+        max-width: calc(100% - 50px);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        line-height: 1.3;
+        font-weight: 700;
+      }
+      
+      /* 滾動條美化 */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg-light);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--primary-light);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+      }
+
+      /* 進度條 */
+      .progress-container {
+        position: fixed;
+        top: 0;
+        z-index: 1030;
+        width: 100%;
+        height: 4px;
+        background: transparent;
+      }
+      .progress-bar {
+        height: 4px;
+        background: var(--accent-color);
+        width: 0%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* 回到頂部按鈕 */
+      .back-to-top {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 45px;
+        height: 45px;
+        background-color: var(--primary-color);
+        color: var(--text-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-speed) ease;
+        box-shadow: var(--shadow-md);
+        z-index: 1000;
+      }
+      .back-to-top.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      .back-to-top:hover {
+        background-color: var(--primary-dark);
+        color: var(--text-light);
+        transform: translateY(-5px);
       }
     </style>
     {% block head %}{% endblock %}
   </head>
   <body>
+    <!-- 頂部進度條 -->
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
     <!-- 導航欄 -->
     <nav class="navbar navbar-expand-md navbar-dark bg-primary">
       <div class="container">
@@ -366,12 +582,50 @@
 
     <!-- 頁尾 -->
     <footer class="footer">
-      <div class="container text-center">
-        <p class="mb-0">
-          &copy; 2025 回憶露 Tzuchia & Dewei. All rights reserved.
-        </p>
+      <div class="container-fluid px-md-5">
+        <div class="row">
+          <div class="col-md-6 mb-4 mb-md-0">
+            <h5 class="mb-3 fw-bold">關於回憶露</h5>
+            <p class="mb-3 ms-auto">回憶露是專為露營愛好者打造的資訊整合平台，</p> 
+            <p class="mb-3 ms-auto">提供全台各地露營地點資訊，幫助您規劃完美的露營之旅，</p>   
+            <p class="mb-3 ms-auto">留下美好回憶。</p>       
+          </div>
+          <!-- <div class="col-md-3 mb-4 mb-md-0">
+            <h5 class="mb-3 fw-bold">快速連結</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2"><a href="{{ url_for('index') }}" class="text-decoration-none text-light">首頁</a></li>
+              <li class="mb-2"><a href="#" class="text-decoration-none text-light">搜尋營地</a></li>
+              <li class="mb-2"><a href="#" class="text-decoration-none text-light">關於我們</a></li>
+              <li class="mb-2"><a href="#" class="text-decoration-none text-light">聯絡我們</a></li>
+            </ul>
+          </div>-->
+          <div class="col-md-3 ms-auto">
+            <h5 class="mb-3 fw-bold">加入好友</h5>
+            <div class="d-flex align-items-center mb-3 ms-auto">
+              <a href="https://line.me/R/ti/p/%40189dsoqf#~" target="_blank" rel="noopener noreferrer" class="d-flex align-items-center text-decoration-none text-light me-3">
+                <img src="{{ url_for('static', filename='Line-Icon.png') }}" alt="LINE" style="height: 24px; width: auto;" class="me-2">
+                <span>@189dsoqf</span>
+              </a>
+            </div>
+            <!--<div class="social-icons">
+              <a href="#" class="text-light me-3" title="Facebook"><i class="fab fa-facebook fa-lg"></i></a>
+              <a href="#" class="text-light me-3" title="Instagram"><i class="fab fa-instagram fa-lg"></i></a>
+              <a href="#" class="text-light" title="YouTube"><i class="fab fa-youtube fa-lg"></i></a>
+            </div>-->
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-12 text-center border-top pt-3">
+            <p class="mb-0">&copy; 2025 回憶露 Tzuchia & Dewei. All rights reserved.</p>
+          </div>
+        </div>
       </div>
     </footer>
+
+    <!-- 回到頂部按鈕 -->
+    <a href="#" class="back-to-top" id="backToTop">
+      <i class="fas fa-arrow-up"></i>
+    </a>
 
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -383,6 +637,28 @@
         setTimeout(function () {
           $(".alert").alert("close");
         }, 5000);
+
+        // 滾動進度條
+        window.onscroll = function() {
+          var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+          var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+          var scrolled = (winScroll / height) * 100;
+          document.getElementById("progressBar").style.width = scrolled + "%";
+          
+          // 顯示或隱藏回到頂部按鈕
+          if (winScroll > 300) {
+            $('#backToTop').addClass('show');
+          } else {
+            $('#backToTop').removeClass('show');
+          }
+        };
+        
+        // 回到頂部按鈕點擊事件
+        $('#backToTop').click(function(e) {
+          e.preventDefault();
+          $('html, body').animate({scrollTop: 0}, 500);
+          return false;
+        });
       });
     </script>
     {% block scripts %}{% endblock %}
