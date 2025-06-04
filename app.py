@@ -118,7 +118,12 @@ def index():
     campsites = campsites_all[start:end]
 
     return render_template(
-        "index.html", campsites=campsites, page=page, total_pages=total_pages, q=q
+        "index.html",
+        campsites=campsites,
+        page=page,
+        total_pages=total_pages,
+        q=q,
+        total_campsites=total,
     )
 
 
