@@ -26,8 +26,45 @@ if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
         "請在 .env 文件中設置 LINE_CHANNEL_ACCESS_TOKEN 和 LINE_CHANNEL_SECRET"
     )
 
-# 用戶搜尋狀態管理
-user_states: Dict[str, Dict[str, Any]] = {}
+# 用戶搜尋狀態管理 - 使用快取優化
+from models import cache
+import time
+
+class UserStateManager:
+    """用戶狀態管理器 - 支援過期清理"""
+    def __init__(self):
+        self.states = {}
+        self.last_cleanup = time.time()
+    
+    def get_state(self, user_id: str) -> Dict[str, Any]:
+        self._cleanup_expired()
+        return self.states.get(user_id, {})
+    
+    def set_state(self, user_id: str, state: Dict[str, Any]):
+        self._cleanup_expired()
+        state['last_activity'] = time.time()
+        self.states[user_id] = state
+    
+    def clear_state(self, user_id: str):
+        self.states.pop(user_id, None)
+    
+    def _cleanup_expired(self):
+        """清理超過30分鐘未活動的用戶狀態"""
+        current_time = time.time()
+        if current_time - self.last_cleanup < 300:  # 每5分鐘清理一次
+            return
+        
+        expired_users = []
+        for user_id, state in self.states.items():
+            if current_time - state.get('last_activity', 0) > 1800:  # 30分鐘過期
+                expired_users.append(user_id)
+        
+        for user_id in expired_users:
+            self.states.pop(user_id, None)
+        
+        self.last_cleanup = current_time
+
+user_state_manager = UserStateManager()
 
 # 定義各區域的縣市
 REGION_CITIES = {
@@ -47,27 +84,48 @@ def verify_signature(request_body, signature):
 
 
 def send_line_message(reply_token, messages):
-    """發送 LINE 訊息"""
+    """發送 LINE 訊息 - 優化版本"""
     url = "https://api.line.me/v2/bot/message/reply"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}",
     }
+    
+    # 確保 messages 是列表格式
+    if not isinstance(messages, list):
+        messages = [messages]
+    
+    # 限制訊息數量（LINE API 限制最多5則）
+    if len(messages) > 5:
+        messages = messages[:5]
+        logger.warning("訊息數量超過限制，已截取前5則")
+    
     data = {
         "replyToken": reply_token,
-        "messages": messages if isinstance(messages, list) else [messages],
+        "messages": messages,
     }
 
     try:
-        logger.info(f"準備發送的訊息: {json.dumps(data, ensure_ascii=False)}")
-        response = requests.post(url, headers=headers, json=data, timeout=10)
-        response.raise_for_status()  # 如果狀態碼不是 200，會拋出異常
-        logger.info(f"LINE API Response: {response.status_code} - {response.text}")
+        # 只在開發模式下記錄詳細訊息
+        if logger.level <= logging.DEBUG:
+            logger.debug(f"準備發送的訊息: {json.dumps(data, ensure_ascii=False)}")
+        
+        response = requests.post(url, headers=headers, json=data, timeout=15)
+        response.raise_for_status()
+        
+        logger.info(f"LINE API 回應成功: {response.status_code}")
         return True
+        
+    except requests.exceptions.Timeout:
+        logger.error("LINE API 請求超時")
+        return False
     except requests.exceptions.RequestException as e:
         logger.error(f"發送 LINE 訊息時發生錯誤: {str(e)}")
-        if hasattr(e.response, "text"):
+        if hasattr(e, 'response') and e.response is not None:
             logger.error(f"錯誤詳情: {e.response.text}")
+        return False
+    except Exception as e:
+        logger.error(f"發送訊息時發生未預期錯誤: {str(e)}")
         return False
 
 
@@ -539,7 +597,10 @@ def safe_get_text(value, field_name=""):
 
 
 def create_camp_bubble(camp):
-    """建立營區資訊 bubble"""
+    """建立營區資訊 bubble - 優化版本"""
+    # 驗證必要資料
+    if not camp or not camp.get('name'):
+        return None
     bubble = {
         "type": "bubble",
         "hero": {
@@ -858,14 +919,14 @@ def handle_message(event, Campsite):
         or message_text == "go"
     ):
         # 初始化用戶狀態
-        user_states[user_id] = {
+        user_state_manager.set_state(user_id, {
             "step": "region",
             "region": None,
             "city": None,
             "altitude": None,
             "pet": None,
             "parking": None,
-        }
+        })
         # 發送地區選擇介面
         send_line_message(event["replyToken"], [create_location_selection()])
         return
@@ -962,49 +1023,43 @@ def handle_postback(event, Campsite):
         # 處理地區選擇
         elif data.get("action") == "select_region":
             region = data.get("region")
-            if user_id not in user_states:
-                user_states[user_id] = {}
-            user_states[user_id]["region"] = region
-            user_states[user_id]["step"] = "city"
-            # 發送對應地區的縣市選擇介面
+            state = user_state_manager.get_state(user_id)
+            state.update({"region": region, "step": "city"})
+            user_state_manager.set_state(user_id, state)
             send_line_message(event["replyToken"], [create_city_selection(region)])
 
         # 處理縣市選擇
         elif data.get("action") == "select_city":
             city = data.get("city")
-            if user_id not in user_states:
-                user_states[user_id] = {}
-            user_states[user_id]["city"] = city
-            user_states[user_id]["step"] = "altitude"
+            state = user_state_manager.get_state(user_id)
+            state.update({"city": city, "step": "altitude"})
+            user_state_manager.set_state(user_id, state)
             send_line_message(event["replyToken"], [create_altitude_selection()])
 
         # 處理海拔選擇
         elif data.get("action") == "select_altitude":
-            if user_id not in user_states:
-                user_states[user_id] = {}
-            user_states[user_id]["altitude"] = data.get("altitude", "兩者皆可")
-            user_states[user_id]["step"] = "pet"
+            state = user_state_manager.get_state(user_id)
+            state.update({"altitude": data.get("altitude", "兩者皆可"), "step": "pet"})
+            user_state_manager.set_state(user_id, state)
             send_line_message(event["replyToken"], [create_pet_selection()])
 
         # 處理寵物選擇
         elif data.get("action") == "select_pet":
-            if user_id not in user_states:
-                user_states[user_id] = {}
-            user_states[user_id]["pet"] = data.get("pet", "兩者皆可")
-            user_states[user_id]["step"] = "parking"
+            state = user_state_manager.get_state(user_id)
+            state.update({"pet": data.get("pet", "兩者皆可"), "step": "parking"})
+            user_state_manager.set_state(user_id, state)
             send_line_message(event["replyToken"], [create_parking_selection()])
 
         # 處理停車選擇
         elif data.get("action") == "select_parking":
-            if user_id not in user_states:
-                user_states[user_id] = {}
-            user_states[user_id]["parking"] = data.get("parking", "兩者皆可")
-            user_states[user_id]["step"] = "go"
+            state = user_state_manager.get_state(user_id)
+            state.update({"parking": data.get("parking", "兩者皆可"), "step": "go"})
+            user_state_manager.set_state(user_id, state)
             send_line_message(event["replyToken"], [create_search_button()])
 
         # 處理搜尋開始
         elif data.get("action") == "search_start":
-            state = user_states.get(user_id, {})
+            state = user_state_manager.get_state(user_id)
 
             # 檢查用戶狀態是否完整
             if (
@@ -1015,14 +1070,14 @@ def handle_postback(event, Campsite):
                 or state.get("step") != "go"
             ):
                 # 初始化用戶狀態並顯示地區選擇介面
-                user_states[user_id] = {
+                user_state_manager.set_state(user_id, {
                     "step": "region",
                     "region": None,
                     "city": None,
                     "altitude": None,
                     "pet": None,
                     "parking": None,
-                }
+                })
                 send_line_message(
                     event["replyToken"],
                     [
@@ -1088,7 +1143,7 @@ def handle_postback(event, Campsite):
                     )
                 else:
                     # 清除用戶狀態
-                    user_states.pop(user_id, None)
+                    user_state_manager.clear_state(user_id)
                     # 顯示搜尋結果
                     return handle_search_results(
                         event["replyToken"], campsites, 1, search_text
