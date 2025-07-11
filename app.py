@@ -14,6 +14,7 @@ from models import Campsite, User
 import requests
 import json
 import logging
+import re
 from dotenv import load_dotenv
 from line_bot import verify_signature, handle_message, handle_postback
 from bson import ObjectId
@@ -91,11 +92,29 @@ def index():
     page = int(request.args.get("page", 1))
     per_page = 12
     q = request.args.get("q", "")
+    sort_by = request.args.get("sort", "name")  # 新增排序功能
+    region = request.args.get("region", "")     # 新增地區篩選
+    pet_friendly = request.args.get("pets", "") # 新增寵物篩選
 
-    if q:
-        campsites_all = Campsite.search_by_keywords(q)
+    # 建構搜尋條件
+    search_query = q
+    if region:
+        search_query += f" {region}"
+    if pet_friendly:
+        search_query += f" {pet_friendly}"
+
+    if search_query.strip():
+        campsites_all = Campsite.search_by_keywords(search_query.strip())
     else:
         campsites_all = Campsite.get_all()
+
+    # 排序功能
+    if sort_by == "altitude":
+        campsites_all = sorted(campsites_all, key=lambda x: int(re.search(r'\d+', x.get('altitude', '0')).group()) if re.search(r'\d+', x.get('altitude', '0')) else 0)
+    elif sort_by == "name":
+        campsites_all = sorted(campsites_all, key=lambda x: x.get('name', ''))
+    elif sort_by == "location":
+        campsites_all = sorted(campsites_all, key=lambda x: x.get('location', ''))
 
     total = len(campsites_all)
     total_pages = (total + per_page - 1) // per_page
@@ -103,12 +122,35 @@ def index():
     end = start + per_page
     campsites = campsites_all[start:end]
 
+    # 取得篩選選項 - 使用完整的台灣縣市列表
+    taiwan_counties = [
+        "台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市",
+        "基隆市", "新竹市", "嘉義市",
+        "新竹縣", "苗栗縣", "彰化縣", "南投縣", "雲林縣", "嘉義縣",
+        "屏東縣", "宜蘭縣", "花蓮縣", "台東縣", "澎湖縣", "金門縣", "連江縣"
+    ]
+    
+    # 也從現有營地資料中提取地區資訊作為補充
+    all_campsites = Campsite.get_all()
+    existing_regions = list(set([camp.get('location', '').split()[0] for camp in all_campsites if camp.get('location')]))
+    existing_regions = [r for r in existing_regions if r and len(r) <= 4]  # 保留縣市名稱
+    
+    # 合併並去重，保持台灣縣市的順序
+    regions = taiwan_counties.copy()
+    for region in existing_regions:
+        if region not in regions:
+            regions.append(region)
+
     return render_template(
         "index.html",
         campsites=campsites,
         page=page,
         total_pages=total_pages,
         q=q,
+        sort_by=sort_by,
+        region=region,
+        pet_friendly=pet_friendly,
+        regions=regions,  # 保持台灣縣市的地理順序
         total_campsites=total,
     )
 

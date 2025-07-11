@@ -316,35 +316,151 @@
     transform: scale(1.05); /* 滑鼠懸停時輕微放大 */
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; /* 滑鼠懸停時更明顯的陰影 */
   }
+  
+  /* 新增的搜尋表單樣式 */
+  .search-form .form-select,
+  .search-form .form-control {
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+  }
+  
+  .search-form .form-select:focus,
+  .search-form .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(139, 90, 43, 0.25);
+  }
+  
+  .search-form .form-select-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  /* 修正排序選單的字體與箭頭重疊問題 */
+  .search-form .sort-select {
+    padding-right: 2rem !important;
+    min-width: 80px;
+    background-position: right 0.5rem center !important;
+    background-size: 12px 9px !important;
+  }
+  
+  .search-form .sort-select option {
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .search-form optgroup {
+    font-weight: bold;
+    color: var(--primary-color);
+    background-color: #f8f9fa;
+  }
+  
+  .search-form optgroup option {
+    font-weight: normal;
+    color: #333;
+    padding-left: 1rem;
+  }
+  
 </style>
+
+
 {% endblock %} 
 
 {% block content %}
 <div class="container">
   <div class="search-box shadow-sm">
     <div class="row g-3 align-items-center">
-      <div class="col-12 col-md-8">
-        <form method="GET" action="{{ url_for('index') }}" class="d-flex flex-column flex-sm-row gap-2">
-          <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
-              <i class="fas fa-search text-muted"></i>
-            </span>
-            <input
-              type="text"
-              name="q"
-              class="form-control border-start-0"
-              placeholder="搜尋營區名稱、位置或特色"
-              value="{{ request.args.get('q', '') }}"
-              aria-label="搜尋營區"
-            />
+      <div class="col-12">
+        <form method="GET" action="{{ url_for('index') }}" class="search-form">
+          <!-- 主搜尋列 -->
+          <div class="row g-2 mb-3">
+            <div class="col-12 col-md-6">
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                  <i class="fas fa-search text-muted"></i>
+                </span>
+                <input
+                  type="text"
+                  name="q"
+                  class="form-control border-start-0"
+                  placeholder="搜尋營區名稱、位置或特色"
+                  value="{{ q }}"
+                  aria-label="搜尋營區"
+                />
+              </div>
+            </div>
+            <div class="col-12 col-md-2">
+              <select name="region" class="form-select">
+                <option value="" {% if not region %}selected{% endif %}>所有地區</option>
+                <optgroup label="北部地區">
+                  <option value="台北市" {% if region == '台北市' %}selected{% endif %}>台北市</option>
+                  <option value="新北市" {% if region == '新北市' %}selected{% endif %}>新北市</option>
+                  <option value="基隆市" {% if region == '基隆市' %}selected{% endif %}>基隆市</option>
+                  <option value="桃園市" {% if region == '桃園市' %}selected{% endif %}>桃園市</option>
+                  <option value="新竹市" {% if region == '新竹市' %}selected{% endif %}>新竹市</option>
+                  <option value="新竹縣" {% if region == '新竹縣' %}selected{% endif %}>新竹縣</option>
+                  <option value="宜蘭縣" {% if region == '宜蘭縣' %}selected{% endif %}>宜蘭縣</option>
+                </optgroup>
+                <optgroup label="中部地區">
+                  <option value="苗栗縣" {% if region == '苗栗縣' %}selected{% endif %}>苗栗縣</option>
+                  <option value="台中市" {% if region == '台中市' %}selected{% endif %}>台中市</option>
+                  <option value="彰化縣" {% if region == '彰化縣' %}selected{% endif %}>彰化縣</option>
+                  <option value="南投縣" {% if region == '南投縣' %}selected{% endif %}>南投縣</option>
+                  <option value="雲林縣" {% if region == '雲林縣' %}selected{% endif %}>雲林縣</option>
+                </optgroup>
+                <optgroup label="南部地區">
+                  <option value="嘉義市" {% if region == '嘉義市' %}selected{% endif %}>嘉義市</option>
+                  <option value="嘉義縣" {% if region == '嘉義縣' %}selected{% endif %}>嘉義縣</option>
+                  <option value="台南市" {% if region == '台南市' %}selected{% endif %}>台南市</option>
+                  <option value="高雄市" {% if region == '高雄市' %}selected{% endif %}>高雄市</option>
+                  <option value="屏東縣" {% if region == '屏東縣' %}selected{% endif %}>屏東縣</option>
+                </optgroup>
+                <optgroup label="東部地區">
+                  <option value="花蓮縣" {% if region == '花蓮縣' %}selected{% endif %}>花蓮縣</option>
+                  <option value="台東縣" {% if region == '台東縣' %}selected{% endif %}>台東縣</option>
+                </optgroup>
+                <optgroup label="離島地區">
+                  <option value="澎湖縣" {% if region == '澎湖縣' %}selected{% endif %}>澎湖縣</option>
+                  <option value="金門縣" {% if region == '金門縣' %}selected{% endif %}>金門縣</option>
+                  <option value="連江縣" {% if region == '連江縣' %}selected{% endif %}>連江縣</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <select name="pets" class="form-select">
+                <option value="">寵物規定</option>
+                <option value="可帶寵物" {% if pet_friendly == '可帶寵物' %}selected{% endif %}>可帶寵物</option>
+                <option value="不可帶寵物" {% if pet_friendly == '不可帶寵物' %}selected{% endif %}>不可帶寵物</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-search me-1"></i>搜尋
+              </button>
+            </div>
           </div>
-          <button
-            type="submit"
-            class="btn btn-primary d-flex align-items-center justify-content-center"
-            style="min-width: 100px"
-          >
-            <i class="fas fa-search me-2"></i><span>搜尋</span>
-          </button>
+          
+          <!-- 排序和篩選 -->
+          <div class="row g-2 align-items-center">
+            <div class="col-auto">
+              <label class="form-label mb-0 text-muted small">排序：</label>
+            </div>
+            <div class="col-auto">
+              <select name="sort" class="form-select form-select-sm sort-select" onchange="this.form.submit()">
+                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>名稱</option>
+                <option value="location" {% if sort_by == 'location' %}selected{% endif %}>地區</option>
+                <option value="altitude" {% if sort_by == 'altitude' %}selected{% endif %}>海拔</option>
+              </select>
+            </div>
+            <div class="col-auto">
+              {% if q or region or pet_friendly %}
+              <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times me-1"></i>清除篩選
+              </a>
+              {% endif %}
+            </div>
+            <div class="col-auto ms-auto">
+              <small class="text-muted">共找到 {{ total_campsites }} 個營地</small>
+            </div>
+          </div>
         </form>
       </div>
       <div class="col-12 col-md-4 text-center text-md-end">
