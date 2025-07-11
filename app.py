@@ -92,9 +92,9 @@ def index():
     page = int(request.args.get("page", 1))
     per_page = 12
     q = request.args.get("q", "")
-    sort_by = request.args.get("sort", "name")  # 新增排序功能
-    region = request.args.get("region", "")     # 新增地區篩選
-    pet_friendly = request.args.get("pets", "") # 新增寵物篩選
+    sort_by = request.args.get("sort", "name")
+    region = request.args.get("region", "")
+    pet_friendly = request.args.get("pets", "")
 
     # 建構搜尋條件
     search_query = q
@@ -103,43 +103,51 @@ def index():
     if pet_friendly:
         search_query += f" {pet_friendly}"
 
+    # 使用優化的查詢
     if search_query.strip():
+        # 搜尋模式：使用快取的搜尋結果
         campsites_all = Campsite.search_by_keywords(search_query.strip())
+        
+        # 排序功能
+        if sort_by == "altitude":
+            campsites_all = sorted(campsites_all, key=lambda x: int(re.search(r'\d+', x.get('altitude', '0')).group()) if re.search(r'\d+', x.get('altitude', '0')) else 0)
+        elif sort_by == "name":
+            campsites_all = sorted(campsites_all, key=lambda x: x.get('name', ''))
+        elif sort_by == "location":
+            campsites_all = sorted(campsites_all, key=lambda x: x.get('location', ''))
+
+        # 手動分頁
+        total = len(campsites_all)
+        total_pages = (total + per_page - 1) // per_page
+        start = (page - 1) * per_page
+        end = start + per_page
+        campsites = campsites_all[start:end]
     else:
-        campsites_all = Campsite.get_all()
+        # 一般瀏覽模式：使用資料庫分頁
+        if sort_by == "name":
+            # 對於排序，暫時使用舊方法（可進一步優化為資料庫排序）
+            campsites_all = Campsite.get_all()
+            campsites_all = sorted(campsites_all, key=lambda x: x.get('name', ''))
+            
+            total = len(campsites_all)
+            total_pages = (total + per_page - 1) // per_page
+            start = (page - 1) * per_page
+            end = start + per_page
+            campsites = campsites_all[start:end]
+        else:
+            # 使用優化的分頁查詢
+            result = Campsite.get_all_paginated(page, per_page)
+            campsites = result['campsites']
+            total = result['total']
+            total_pages = result['total_pages']
 
-    # 排序功能
-    if sort_by == "altitude":
-        campsites_all = sorted(campsites_all, key=lambda x: int(re.search(r'\d+', x.get('altitude', '0')).group()) if re.search(r'\d+', x.get('altitude', '0')) else 0)
-    elif sort_by == "name":
-        campsites_all = sorted(campsites_all, key=lambda x: x.get('name', ''))
-    elif sort_by == "location":
-        campsites_all = sorted(campsites_all, key=lambda x: x.get('location', ''))
-
-    total = len(campsites_all)
-    total_pages = (total + per_page - 1) // per_page
-    start = (page - 1) * per_page
-    end = start + per_page
-    campsites = campsites_all[start:end]
-
-    # 取得篩選選項 - 使用完整的台灣縣市列表
+    # 取得篩選選項 - 使用快取的台灣縣市列表
     taiwan_counties = [
         "台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市",
         "基隆市", "新竹市", "嘉義市",
         "新竹縣", "苗栗縣", "彰化縣", "南投縣", "雲林縣", "嘉義縣",
         "屏東縣", "宜蘭縣", "花蓮縣", "台東縣", "澎湖縣", "金門縣", "連江縣"
     ]
-    
-    # 也從現有營地資料中提取地區資訊作為補充
-    all_campsites = Campsite.get_all()
-    existing_regions = list(set([camp.get('location', '').split()[0] for camp in all_campsites if camp.get('location')]))
-    existing_regions = [r for r in existing_regions if r and len(r) <= 4]  # 保留縣市名稱
-    
-    # 合併並去重，保持台灣縣市的順序
-    regions = taiwan_counties.copy()
-    for region in existing_regions:
-        if region not in regions:
-            regions.append(region)
 
     return render_template(
         "index.html",
@@ -150,7 +158,7 @@ def index():
         sort_by=sort_by,
         region=region,
         pet_friendly=pet_friendly,
-        regions=regions,  # 保持台灣縣市的地理順序
+        regions=taiwan_counties,
         total_campsites=total,
     )
 
@@ -273,6 +281,38 @@ def update_data():
 @app.route("/health")
 def health_check():
     return {"status": "healthy"}, 200
+
+
+@app.route("/cache/stats")
+@login_required
+def cache_stats():
+    """快取統計資訊（僅限管理員）"""
+    from cache_manager import CacheManager
+    stats = CacheManager.get_cache_stats()
+    return {
+        "cache_stats": stats,
+        "status": "success"
+    }, 200
+
+
+@app.route("/cache/clear")
+@login_required
+def clear_cache():
+    """清除快取（僅限管理員）"""
+    from models import cache
+    cache.clear()
+    flash("快取已清除", "success")
+    return redirect(url_for("index"))
+
+
+@app.route("/cache/warmup")
+@login_required
+def warmup_cache():
+    """預熱快取（僅限管理員）"""
+    from cache_manager import CacheManager
+    result = CacheManager.warm_up_cache()
+    flash(result, "success")
+    return redirect(url_for("index"))
 
 
 @app.route("/login", methods=["GET", "POST"])

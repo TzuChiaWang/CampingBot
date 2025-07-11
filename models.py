@@ -5,6 +5,10 @@ import os
 from dotenv import load_dotenv
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+import time
+from functools import wraps
+import hashlib
+import json
 
 # 載入環境變數
 load_dotenv()
@@ -20,6 +24,83 @@ client = MongoClient(
 db = client[os.getenv("MONGODB_DB")]
 collection = db[os.getenv("MONGODB_COLLECTION")]
 users = db['users']  # 新增用戶集合
+
+# 簡單的記憶體快取實作
+class SimpleCache:
+    def __init__(self, default_timeout=300):  # 5分鐘預設過期時間
+        self.cache = {}
+        self.default_timeout = default_timeout
+    
+    def get(self, key):
+        if key in self.cache:
+            value, expiry = self.cache[key]
+            if time.time() < expiry:
+                return value
+            else:
+                del self.cache[key]
+        return None
+    
+    def set(self, key, value, timeout=None):
+        if timeout is None:
+            timeout = self.default_timeout
+        expiry = time.time() + timeout
+        self.cache[key] = (value, expiry)
+    
+    def delete(self, key):
+        if key in self.cache:
+            del self.cache[key]
+    
+    def clear(self):
+        self.cache.clear()
+
+# 全域快取實例
+cache = SimpleCache()
+
+# 快取裝飾器
+def cached(timeout=300):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # 生成快取鍵
+            cache_key = f"{func.__name__}:{hashlib.md5(str(args + tuple(sorted(kwargs.items()))).encode()).hexdigest()}"
+            
+            # 嘗試從快取獲取
+            result = cache.get(cache_key)
+            if result is not None:
+                return result
+            
+            # 執行函數並快取結果
+            result = func(*args, **kwargs)
+            cache.set(cache_key, result, timeout)
+            return result
+        return wrapper
+    return decorator
+
+# 建立索引
+def create_indexes():
+    """建立資料庫索引以提升查詢效能"""
+    try:
+        # 為常用查詢欄位建立索引
+        collection.create_index("name")
+        collection.create_index("location")
+        collection.create_index("altitude")
+        collection.create_index("pets")
+        collection.create_index("parking")
+        collection.create_index("signal_strength")
+        
+        # 建立複合索引
+        collection.create_index([("location", 1), ("pets", 1)])
+        collection.create_index([("name", "text"), ("location", "text"), ("features", "text")])
+        
+        # 用戶集合索引
+        users.create_index("username", unique=True)
+        
+        print("✅ 資料庫索引建立完成")
+    except Exception as e:
+        print(f"⚠️ 索引建立警告: {e}")
+
+# 初始化時建立索引
+create_indexes()
 
 class User(UserMixin):
     def __init__(self, username):
@@ -52,16 +133,37 @@ class User(UserMixin):
 
 class Campsite:
     @staticmethod
+    @cached(timeout=600)  # 快取10分鐘
     def get_all() -> List[Dict[str, Any]]:
         """獲取所有營地"""
         return list(collection.find())
 
     @staticmethod
+    @cached(timeout=1800)  # 快取30分鐘
+    def get_all_paginated(page: int = 1, per_page: int = 12) -> Dict[str, Any]:
+        """分頁獲取營地資料"""
+        skip = (page - 1) * per_page
+        
+        # 使用 MongoDB 的分頁查詢
+        campsites = list(collection.find().skip(skip).limit(per_page))
+        total = collection.count_documents({})
+        
+        return {
+            'campsites': campsites,
+            'total': total,
+            'page': page,
+            'per_page': per_page,
+            'total_pages': (total + per_page - 1) // per_page
+        }
+
+    @staticmethod
+    @cached(timeout=1800)  # 快取30分鐘
     def get_by_id(id) -> Dict[str, Any]:
         """根據ID獲取營地"""
         return collection.find_one({"_id": id})
 
     @staticmethod
+    @cached(timeout=1800)  # 快取30分鐘
     def get_by_name(name: str) -> Dict[str, Any]:
         """根據名稱獲取營地"""
         return collection.find_one({"name": name})
@@ -69,20 +171,35 @@ class Campsite:
     @staticmethod
     def create(data: Dict[str, Any]) -> None:
         """創建新的營地記錄"""
-        collection.insert_one(data)
+        result = collection.insert_one(data)
+        # 清除相關快取
+        cache.clear()
+        return result
 
     @staticmethod
     def update(id, data: Dict[str, Any]) -> None:
         """更新營地資訊"""
-        collection.update_one({"_id": id}, {"$set": data})
+        result = collection.update_one({"_id": id}, {"$set": data})
+        # 清除相關快取
+        cache.clear()
+        return result
 
     @staticmethod
     def delete(id) -> None:
         """刪除營地"""
-        collection.delete_one({"_id": id})
+        result = collection.delete_one({"_id": id})
+        # 清除相關快取
+        cache.clear()
+        return result
+
+    @staticmethod
+    def get_total_count() -> int:
+        """獲取營地總數"""
+        return collection.count_documents({})
 
 
     @staticmethod
+    @cached(timeout=300)  # 快取5分鐘
     def search_by_keywords(keywords: str) -> List[Dict[str, Any]]:
         """根據關鍵字搜索營地"""
         if not keywords:
