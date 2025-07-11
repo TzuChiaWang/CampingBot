@@ -81,26 +81,6 @@ class Campsite:
         """刪除營地"""
         collection.delete_one({"_id": id})
 
-    @staticmethod
-    def search(query: str) -> List[Dict[str, Any]]:
-        """搜索營地"""
-        if not query:
-            return list(collection.find())
-
-        # 建立搜索條件
-        regex = re.compile(query, re.IGNORECASE)
-        search_conditions = {
-            "$or": [
-                {"name": regex},
-                {"location": regex},
-                {"features": regex},
-                {"altitude": regex},
-                {"WC": regex},
-                {"facilities": regex},
-                {"sideservice": regex},
-            ]
-        }
-        return list(collection.find(search_conditions))
 
     @staticmethod
     def search_by_keywords(keywords: str) -> List[Dict[str, Any]]:

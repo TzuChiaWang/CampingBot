@@ -217,7 +217,7 @@ def scrape_campsite():
             response = requests.get(base_url, headers=HTML_HEADERS)
             response.raise_for_status()
         except requests.RequestException as e:
-            print(f"❌ 無法取得網頁 {base_url}：{e}")
+            pass  # 靜默處理錯誤
             continue  # 跳過錯誤網址
 
         soup = BeautifulSoup(response.text, "html.parser")

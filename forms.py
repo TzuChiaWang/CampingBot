@@ -1,4 +1,3 @@
-from random import choice
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, widgets, PasswordField
 from wtforms.validators import DataRequired, URL, Optional
