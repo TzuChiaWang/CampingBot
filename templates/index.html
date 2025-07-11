@@ -554,15 +554,10 @@
                 campsite.signal_strength }}{% else %}{% for signal in
                 campsite.signal_strength %}{{ signal }}{% if not loop.last %},
                 {% endif %}{% endfor %}{% endif %}{% else %}無資訊{% endif %}<br />
-                <i class="fas fa-toilet"></i> 衛浴：{{ campsite.WC or '無資訊'
-                }}<br />
                 <i class="fas fa-paw"></i> 寵物：{{ campsite.pets or '無資訊'
                 }}<br />
                 {% if campsite.facilities %}
                 <i class="fas fa-campground"></i> 設施：{{ campsite.facilities
-                }}<br />
-                {% endif %} {% if campsite.sideservice %}
-                <i class="fas fa-store"></i> 附近服務：{{ campsite.sideservice
                 }}<br />
                 {% endif %} {% if campsite.open_time %}
                 <i class="fas fa-clock"></i> 開放時間：{{ campsite.open_time
